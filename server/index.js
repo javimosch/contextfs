@@ -126,9 +126,10 @@ app.use((err, req, res, next) => {
 // ── HTTP + WS server ──────────────────────────────────────────────────────────
 const server = http.createServer(app);
 
-// Only start WS server in normal (non-local) mode
+// WebSocket server - only created in normal (non-local) mode
+let wss = null;
 if (!LOCAL_MODE) {
-  const wss = new WebSocketServer({ server });
+  wss = new WebSocketServer({ server });
 
   wss.on('connection', (ws, req) => {
     if (VERBOSE) console.log(`[WS] New connection from ${req.socket.remoteAddress}`);
