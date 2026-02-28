@@ -15,7 +15,6 @@ Usage:
   contextfs server [options]    Start the ContextFS server (HTTP + WebSocket)
   contextfs client [options]    Start a ContextFS client (connects to server)
   contextfs chat [options]      Start an interactive chat session
-  contextfs config             Open config file in nano editor
 
 Server options:
   --port <port>       Port to listen on (default: 3010, env: PORT)
@@ -84,29 +83,6 @@ if (subcommand === 'server') {
   require('../chat/main.js').main().catch((err) => {
     console.error('[ERROR]', err.message);
     process.exit(1);
-  });
-} else if (subcommand === 'config') {
-  const fs = require('fs');
-  const configDir = path.dirname(CONFIG_PATH);
-  
-  // Ensure config directory exists
-  if (!fs.existsSync(configDir)) {
-    fs.mkdirSync(configDir, { recursive: true });
-  }
-  
-  // Create empty config file if it doesn't exist
-  if (!fs.existsSync(CONFIG_PATH)) {
-    fs.writeFileSync(CONFIG_PATH, JSON.stringify({}, null, 2), 'utf8');
-  }
-  
-  // Spawn nano with the config file
-  const nano = spawn('nano', [CONFIG_PATH], {
-    stdio: 'inherit',
-    env: process.env,
-  });
-  
-  nano.on('exit', (code) => {
-    process.exit(code || 0);
   });
 } else {
   console.error(`Unknown subcommand: ${subcommand}`);

@@ -1,7 +1,7 @@
 'use strict';
 
 const readline = require('readline');
-const { bootstrapConfig } = require('./config');
+const { bootstrapConfig, loadConfig, mergeConfig } = require('./config');
 const { McpSseClient, McpStdioClient } = require('./mcp-client');
 const { LlmClient } = require('./llm-client');
 const { runToolLoop, buildInitialHistory } = require('./tool-loop');
@@ -50,6 +50,7 @@ function printBanner(model, mcpServer) {
   process.stdout.write(`  Model  : ${model}\n`);
   process.stdout.write(`  Server : ${mcpServer}\n`);
   process.stdout.write('  Commands: /exit  /clear  /tools  /history  /reconnect\n');
+  process.stdout.write('            contextfs chat config --help\n');
   process.stdout.write('\n');
 }
 
@@ -126,6 +127,86 @@ async function runNonInteractive({ mcpClient, llm, openAiTools, message, outputJ
 async function main() {
   const argv = process.argv.slice(3); // skip node, contextfs.js, 'chat'
   const args = parseArgs(argv);
+
+  // ── Config subcommand ─────────────────────────────────────────────────────────
+  if (argv[0] === 'config') {
+    const configArgs = argv.slice(1);
+    const showHelp = configArgs.includes('--help') || configArgs.length === 0;
+    
+    if (showHelp) {
+      process.stdout.write(`
+contextfs chat config — Manage chat configuration
+
+Usage:
+  contextfs chat config              Show current config
+  contextfs chat config --help       Show this help message
+  contextfs chat config --set key=value   Set a config value
+
+Options:
+  model         LLM model (e.g., google/gemini-2.5-flash-preview, anthropic/claude-3-5-sonnet)
+  maxTokens     Max tokens to generate (default: 4096)
+  temperature   Sampling temperature (default: 0.7)
+  apiKey        OpenRouter API key
+  vcId          Virtual Client ID
+  vcKey         Virtual Client Key
+
+Examples:
+  contextfs chat config --set model=anthropic/claude-3-5-sonnet
+  contextfs chat config --set temperature=0.9
+  contextfs chat config --set vcId=my-vc-id --set vcKey=my-key
+
+Config file: ~/.contextfs/chat-config.json
+`);
+      process.exit(0);
+    }
+
+    // Parse --set key=value arguments
+    const updates = {};
+    for (let i = 0; i < configArgs.length; i++) {
+      const token = configArgs[i];
+      if (token === '--set') {
+        // Handle --set key=value (two tokens)
+        if (i + 1 < configArgs.length) {
+          const kv = configArgs[i + 1];
+          const eqIdx = kv.indexOf('=');
+          if (eqIdx > 0) {
+            const key = kv.slice(0, eqIdx);
+            const value = kv.slice(eqIdx + 1);
+            if (value === 'true') updates[key] = true;
+            else if (value === 'false') updates[key] = false;
+            else if (!isNaN(value)) updates[key] = Number(value);
+            else updates[key] = value;
+          }
+          i++; // skip the value token
+        }
+      } else if (token.startsWith('--set=')) {
+        // Handle --set=key=value (single token)
+        const kv = token.slice(6); // remove '--set='
+        const eqIdx = kv.indexOf('=');
+        if (eqIdx > 0) {
+          const key = kv.slice(0, eqIdx);
+          const value = kv.slice(eqIdx + 1);
+          if (value === 'true') updates[key] = true;
+          else if (value === 'false') updates[key] = false;
+          else if (!isNaN(value)) updates[key] = Number(value);
+          else updates[key] = value;
+        }
+      }
+    }
+
+    if (Object.keys(updates).length > 0) {
+      const merged = mergeConfig(updates);
+      process.stdout.write('Config updated:\n');
+      process.stdout.write(JSON.stringify(merged, null, 2) + '\n');
+      process.exit(0);
+    }
+
+    // No args, show current config
+    const current = loadConfig();
+    process.stdout.write('Current config:\n');
+    process.stdout.write(JSON.stringify(current, null, 2) + '\n');
+    process.exit(0);
+  }
 
   const vcIdArg = args['vc-id'] || process.env.CONTEXTFS_VC_ID || '';
   const vcKeyArg = args['vc-key'] || process.env.CONTEXTFS_VC_KEY || '';

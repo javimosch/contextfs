@@ -156,4 +156,20 @@ async function bootstrapConfig({ model, maxTokens, temperature, vcId: vcIdArg, v
   };
 }
 
-module.exports = { bootstrapConfig, loadConfig, saveConfig, prompt, CONFIG_PATH, CONTEXTFS_HOME };
+module.exports = { bootstrapConfig, loadConfig, saveConfig, mergeConfig, prompt, CONFIG_PATH, CONTEXTFS_HOME };
+
+/**
+ * Deep merge updates into existing config and save.
+ * Returns the merged config.
+ */
+function mergeConfig(updates) {
+  const existing = loadConfig();
+  const merged = { ...existing };
+  for (const [key, value] of Object.entries(updates)) {
+    if (value !== undefined) {
+      merged[key] = value;
+    }
+  }
+  saveConfig(merged);
+  return merged;
+}
