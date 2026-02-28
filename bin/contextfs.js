@@ -12,9 +12,10 @@ function showHelp() {
 contextfs - Context Filesystem for LLM Agents
 
 Usage:
-  contextfs server [options]    Start the ContextFS server (HTTP + WebSocket)
-  contextfs client [options]    Start a ContextFS client (connects to server)
-  contextfs chat [options]      Start an interactive chat session
+  contextfs                       Start interactive chat (same as: contextfs chat --spawn)
+  contextfs server [options]      Start the ContextFS server (HTTP + WebSocket)
+  contextfs client [options]      Start a ContextFS client (connects to server)
+  contextfs chat [options]        Start an interactive chat session
 
 Server options:
   --port <port>       Port to listen on (default: 3010, env: PORT)
@@ -40,7 +41,8 @@ Chat options:
   --mcp-server <url>  MCP server base URL (default: http://localhost:3010, env: CONTEXTFS_MCP_SERVER)
   --vc-id <id>        Virtual client ID (env: CONTEXTFS_VC_ID)
   --vc-key <key>      Virtual client API key (env: CONTEXTFS_VC_KEY)
-  --model <model>     LLM model to use via OpenRouter (env: CONTEXTFS_MODEL)
+  --model <model>     LLM model to use (env: CONTEXTFS_MODEL)
+  --base-url <url>    OpenAI-compatible API base URL (default: https://openrouter.ai/api/v1, env: CONTEXTFS_BASE_URL)
   --message <text>    Non-interactive: send a single message and exit (alias: -m)
   --stdin             Non-interactive: read message from stdin
   --output json       Output raw JSON { message, toolCalls, durationMs } (non-interactive only)
@@ -67,9 +69,20 @@ Examples:
 `);
 }
 
-if (!subcommand || subcommand === '--help' || subcommand === '-h') {
+// Handle help flags explicitly
+if (subcommand === '--help' || subcommand === '-h') {
   showHelp();
   process.exit(0);
+}
+
+// Default to chat --spawn when no subcommand provided
+if (!subcommand) {
+  process.argv.splice(2, 0, 'chat', '--spawn');
+  require('../chat/main.js').main().catch((err) => {
+    console.error('[ERROR]', err.message);
+    process.exit(1);
+  });
+  return;
 }
 
 if (subcommand === 'server') {
