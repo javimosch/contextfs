@@ -140,6 +140,7 @@ Usage:
 Options:
   --port <port>       Port to listen on (default: 3010, env: PORT)
   --local             Local mode: tools run in-process, no WS clients
+  --cwd <path>        Workspace root path (local mode only)
   --mcp [transport]   Enable MCP server (stdio or sse)
   --vc-id <id>        Virtual client ID for stdio MCP
   --vc-key <key>      Virtual client API key for stdio MCP
@@ -153,6 +154,7 @@ MCP Transport:
 Examples:
   contextfs server
   contextfs server --port 3010 --insecure
+  contextfs server --local --cwd /data/workspaces
   contextfs server --mcp --vc-id vc1 --vc-key secret
   contextfs server --mcp sse
 `);
