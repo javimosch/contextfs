@@ -13,6 +13,7 @@ const DEFAULTS = {
   model: 'google/gemini-2.5-flash-preview',
   maxTokens: 4096,
   temperature: 0.7,
+  baseUrl: 'https://openrouter.ai/api/v1',
 };
 
 /**
@@ -106,24 +107,24 @@ function generateVcKey() {
  * 
  * Returns { apiKey, model, maxTokens, temperature, vcId, vcKey }
  */
-async function bootstrapConfig({ model, maxTokens, temperature, vcId: vcIdArg, vcKey: vcKeyArg, spawn = false } = {}) {
+async function bootstrapConfig({ model, maxTokens, temperature, vcId: vcIdArg, vcKey: vcKeyArg, baseUrl: baseUrlArg, spawn = false } = {}) {
   const config = loadConfig();
 
   // API key resolution order: env → config → prompt
   let apiKey = process.env.OPENROUTER_API_KEY || config.apiKey || '';
 
   if (!apiKey) {
-    process.stderr.write('\n[Chat] No OpenRouter API key found.\n');
-    process.stderr.write('[Chat] Get one at https://openrouter.ai/keys\n\n');
+    process.stderr.write('\n[Chat] No API key found.\n');
+    process.stderr.write('[Chat] Get an API key from your provider (default: https://openrouter.ai/keys)\n\n');
 
     try {
-      apiKey = await prompt('Enter your OpenRouter API key: ', { silent: true });
+      apiKey = await prompt('Enter your API key: ', { silent: true });
     } catch (_) {
-      apiKey = await prompt('Enter your OpenRouter API key: ');
+      apiKey = await prompt('Enter your API key: ');
     }
 
     if (!apiKey) {
-      throw new Error('OpenRouter API key is required. Set OPENROUTER_API_KEY or enter it when prompted.');
+      throw new Error('API key is required. Set OPENROUTER_API_KEY or enter it when prompted.');
     }
 
     config.apiKey = apiKey;
@@ -172,9 +173,32 @@ async function bootstrapConfig({ model, maxTokens, temperature, vcId: vcIdArg, v
     process.stderr.write(`[Chat] VC credentials saved to ${CONFIG_PATH}\n`);
   }
 
+  // Interactive setup for model and baseUrl when in spawn mode
+  if (spawn) {
+    if (!config.model && !model) {
+      const defaultModel = DEFAULTS.model;
+      const modelInput = await prompt(`Enter model name [${defaultModel}]: `);
+      config.model = modelInput || defaultModel;
+      needsSave = true;
+    }
+
+    if (!config.baseUrl && !baseUrlArg) {
+      const defaultBaseUrl = DEFAULTS.baseUrl;
+      const baseUrlInput = await prompt(`Enter API base URL [${defaultBaseUrl}]: `);
+      config.baseUrl = baseUrlInput || defaultBaseUrl;
+      needsSave = true;
+    }
+  }
+
+  if (needsSave) {
+    saveConfig(config);
+    process.stderr.write(`[Chat] Configuration saved to ${CONFIG_PATH}\n`);
+  }
+
   const resolvedModel = model || config.model || DEFAULTS.model;
   const resolvedMaxTokens = maxTokens || config.maxTokens || DEFAULTS.maxTokens;
   const resolvedTemp = temperature !== undefined ? temperature : (config.temperature ?? DEFAULTS.temperature);
+  const resolvedBaseUrl = baseUrlArg || config.baseUrl || DEFAULTS.baseUrl;
 
   return {
     apiKey,
@@ -183,6 +207,7 @@ async function bootstrapConfig({ model, maxTokens, temperature, vcId: vcIdArg, v
     model: resolvedModel,
     maxTokens: resolvedMaxTokens,
     temperature: resolvedTemp,
+    baseUrl: resolvedBaseUrl,
     configPath: CONFIG_PATH,
   };
 }
@@ -192,7 +217,7 @@ module.exports = { bootstrapConfig, loadConfig, saveConfig, mergeConfig, validat
 /**
  * Supported config keys.
  */
-const SUPPORTED_KEYS = ['model', 'maxTokens', 'temperature', 'apiKey', 'vcId', 'vcKey'];
+const SUPPORTED_KEYS = ['model', 'maxTokens', 'temperature', 'apiKey', 'vcId', 'vcKey', 'baseUrl'];
 
 /**
  * Validate config keys.
