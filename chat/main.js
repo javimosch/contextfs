@@ -1,7 +1,7 @@
 'use strict';
 
 const readline = require('readline');
-const { bootstrapConfig, loadConfig, mergeConfig } = require('./config');
+const { bootstrapConfig, loadConfig, mergeConfig, CONFIG_PATH } = require('./config');
 const { McpSseClient, McpStdioClient } = require('./mcp-client');
 const { LlmClient } = require('./llm-client');
 const { runToolLoop, buildInitialHistory } = require('./tool-loop');
@@ -210,6 +210,7 @@ Config file: ~/.contextfs/chat-config.json
 
     // No args, show current config
     const current = loadConfig();
+    process.stdout.write(`Config file: ${CONFIG_PATH}\n`);
     process.stdout.write('Current config:\n');
     process.stdout.write(JSON.stringify(current, null, 2) + '\n');
     process.exit(0);
