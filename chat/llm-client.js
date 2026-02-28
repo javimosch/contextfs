@@ -51,7 +51,14 @@ class LlmClient {
     const choice = data.choices[0];
     return {
       message: choice.message,
-      usage: data.usage || null,
+      usage: {
+        prompt_tokens: data.usage?.prompt_tokens || 0,
+        completion_tokens: data.usage?.completion_tokens || 0,
+        total_tokens: data.usage?.total_tokens || 0,
+        prompt_tokens_cost: data.usage?.prompt_tokens_cost,
+        completion_tokens_cost: data.usage?.completion_tokens_cost,
+        total_cost: data.usage?.total_cost,
+      },
       finish_reason: choice.finish_reason,
     };
   }
