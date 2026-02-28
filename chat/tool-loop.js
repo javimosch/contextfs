@@ -75,6 +75,9 @@ async function runToolLoop({
     prompt_tokens: 0,
     completion_tokens: 0,
     total_tokens: 0,
+    prompt_tokens_cost: 0,
+    completion_tokens_cost: 0,
+    total_cost: 0,
   };
 
   const accumulateUsage = (usage) => {
@@ -82,6 +85,12 @@ async function runToolLoop({
     cumulativeUsage.prompt_tokens += (usage.prompt_tokens || 0);
     cumulativeUsage.completion_tokens += (usage.completion_tokens || 0);
     cumulativeUsage.total_tokens += (usage.total_tokens || 0);
+    // Only accumulate cost if present (not all providers support it)
+    if (usage.total_cost !== undefined) {
+      cumulativeUsage.prompt_tokens_cost += (usage.prompt_tokens_cost || 0);
+      cumulativeUsage.completion_tokens_cost += (usage.completion_tokens_cost || 0);
+      cumulativeUsage.total_cost += (usage.total_cost || 0);
+    }
   };
 
   while (iterations < MAX_TOOL_ITERATIONS) {
