@@ -70,7 +70,16 @@ function printUsage(model, usage) {
   else if (m.includes('gpt-4o')) windowSize = 128000;
 
   const percent = ((usage.total_tokens / windowSize) * 100).toFixed(2);
-  const line = `Tokens: ${usage.total_tokens} / ${windowSize} (${percent}%) [P: ${usage.prompt_tokens} / C: ${usage.completion_tokens}]`;
+  let line = `Tokens: ${usage.total_tokens} / ${windowSize} (${percent}%) [P: ${usage.prompt_tokens} / C: ${usage.completion_tokens}]`;
+
+  // Append cost if available
+  if (usage.total_cost !== undefined) {
+    const costStr = usage.total_cost < 0.01
+      ? `$${usage.total_cost.toFixed(6)}`  // Show more precision for small costs
+      : `$${usage.total_cost.toFixed(4)}`;
+    line += ` | Cost: ${costStr}`;
+  }
+
   process.stdout.write(`  \x1b[90m${line}\x1b[0m\n\n`);
 }
 
