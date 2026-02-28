@@ -248,7 +248,7 @@ Config file: ~/.contextfs/chat-config.json
 
   if (shouldSpawn) {
     const binPath = require('path').join(__dirname, '../bin/contextfs.js');
-    const spawnArgs = ['server', '--mcp', 'stdio', '--vc-id', cfg.vcId, '--vc-key', cfg.vcKey, '--port', '0'];
+    const spawnArgs = ['server', '--mcp', 'stdio', '--local', '--vc-id', cfg.vcId, '--vc-key', cfg.vcKey, '--port', '0'];
     if (verbose) spawnArgs.push('--verbose');
     if (insecure) spawnArgs.push('--insecure');
 
