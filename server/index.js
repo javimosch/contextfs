@@ -174,6 +174,8 @@ server.listen(PORT, () => {
         process.exit(1);
       }
       console.log(`[ContextFS] MCP server starting (stdio transport) for VC: ${MCP_VC_ID}`);
+      // Ensure the virtual client exists in registry (handles auto-provisioned credentials)
+      registry.ensureVirtualClient(MCP_VC_ID, MCP_VC_KEY);
       const mcpServer = createMcpServer({
         registry,
         wsHandler,
