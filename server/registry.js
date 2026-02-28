@@ -171,6 +171,37 @@ class Registry {
     return doc && doc.apiKey === apiKey;
   }
 
+  /**
+   * Ensure a virtual client exists with the given ID and API key.
+   * Creates the client if it doesn't exist (for auto-provisioned credentials).
+   * Returns the virtual client document.
+   */
+  ensureVirtualClient(id, apiKey, { name = '', description = '' } = {}) {
+    const existing = this._virtualClients.get(id);
+    if (existing) {
+      // If exists but key doesn't match, update the key
+      if (existing.apiKey !== apiKey) {
+        return this._virtualClients.set(id, { ...existing, apiKey });
+      }
+      return existing;
+    }
+    // Create new virtual client with specific ID and key
+    const doc = {
+      id,
+      name: name || `vc-${id.slice(0, 6)}`,
+      description,
+      apiKey,
+      status: 'idle',
+      assignedWsClientId: null,
+      activeWorkspaceId: null,
+      createdAt: nowIso(),
+      lastHeartbeat: null,
+      lastError: null,
+    };
+    this._virtualClients.set(id, doc);
+    return { ...doc };
+  }
+
   // ── Workspaces ────────────────────────────────────────────────────────────
 
   createWorkspace({ virtualClientId, name, description = '' } = {}) {
