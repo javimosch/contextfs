@@ -131,7 +131,7 @@ async function main() {
   // ── Config subcommand ─────────────────────────────────────────────────────────
   if (argv[0] === 'config') {
     const configArgs = argv.slice(1);
-    const showHelp = configArgs.includes('--help') || configArgs.length === 0;
+    const showHelp = configArgs.includes('--help');
     
     if (showHelp) {
       process.stdout.write(`
@@ -220,6 +220,10 @@ Config file: ~/.contextfs/chat-config.json
   const insecure = args['insecure'] === true;
   const timeoutMs = parseInt(args['timeout']) || 10000;
 
+  // Determine spawn mode early so bootstrapConfig can auto-provision credentials
+  const mcpServer = args['mcp-server'] || process.env.CONTEXTFS_MCP_SERVER;
+  const shouldSpawn = args['spawn'] === true || (!mcpServer && !process.env.CONTEXTFS_MCP_SERVER);
+
   // Bootstrap config (API key, model, vc credentials, etc.)
   let cfg;
   try {
@@ -227,16 +231,12 @@ Config file: ~/.contextfs/chat-config.json
       model: modelArg,
       vcId: vcIdArg,
       vcKey: vcKeyArg,
+      spawn: shouldSpawn,
     });
   } catch (err) {
     process.stderr.write(`[Chat] Config error: ${err.message}\n`);
     process.exit(1);
   }
-
-  const mcpServer = args['mcp-server']
-    || process.env.CONTEXTFS_MCP_SERVER;
-
-  const shouldSpawn = args['spawn'] === true || (!mcpServer && !process.env.CONTEXTFS_MCP_SERVER);
 
   let mcpClient;
   let serverInfo = '';
