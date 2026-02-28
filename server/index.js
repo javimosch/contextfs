@@ -66,6 +66,9 @@ const CONTEXTFS_HOME = path.join(os.homedir(), '.contextfs');
 // Local mode flag
 const LOCAL_MODE = argv.includes('--local') || process.env.CONTEXTFS_LOCAL === '1';
 
+// --cwd override for local mode workspace root
+const CWD_ARG = getArg('cwd', '');
+
 // MCP flags
 const MCP_IDX = argv.indexOf('--mcp');
 const MCP_ENABLED = MCP_IDX !== -1;
@@ -94,7 +97,10 @@ const scheduler = LOCAL_MODE
   : new Scheduler(registry);
 
 // In local mode, wsHandler is replaced by the local adapter (same interface)
-const localWorkspaceRoot = path.join(CONTEXTFS_HOME, 'workspaces', 'local');
+// --cwd overrides the default local workspace root
+const localWorkspaceRoot = LOCAL_MODE && CWD_ARG
+  ? path.resolve(CWD_ARG)
+  : path.join(CONTEXTFS_HOME, 'workspaces', 'local');
 const wsHandler = LOCAL_MODE
   ? createLocalAdapter({ workspaceRoot: localWorkspaceRoot, insecure: INSECURE, registry, scheduler })
   : createWsHandler({ registry, scheduler });
