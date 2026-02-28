@@ -127,6 +127,45 @@ async function runNonInteractive({ mcpClient, llm, openAiTools, message, outputJ
 
 async function main() {
   const argv = process.argv.slice(3); // skip node, contextfs.js, 'chat'
+  
+  // Handle --help early
+  if (argv.includes('--help') || argv.includes('-h')) {
+    console.log(`
+contextfs chat — Interactive chat with ContextFS tools
+
+Usage:
+  contextfs chat [options]        Start interactive chat
+  contextfs chat --spawn          Spawn local MCP server automatically
+  contextfs chat -m "message"     Send single message and exit
+
+Options:
+  --spawn             Spawn a local server using stdio (no separate server needed)
+  --mcp-server <url>  MCP server base URL (default: http://localhost:3010)
+  --vc-id <id>        Virtual client ID
+  --vc-key <key>      Virtual client API key
+  --model <model>     LLM model (env: CONTEXTFS_MODEL)
+  --base-url <url>    OpenAI-compatible API base URL
+  -m, --message <text>  Send single message and exit
+  --stdin             Read message from stdin
+  --output json       Output raw JSON (non-interactive only)
+  --no-tools          Disable tool calls
+  --timeout <ms>      Global tool execution timeout (default: 10000)
+  --insecure          Enable bash_script_once tool
+  --verbose           Enable verbose logging
+
+Config:
+  contextfs chat config           Show current config
+  contextfs chat config --help    Show config help
+
+Examples:
+  contextfs chat
+  contextfs chat --spawn --model google/gemini-2.5-flash-preview
+  contextfs chat -m "list files" --output json
+  echo "summarize README" | contextfs chat --stdin
+`);
+    process.exit(0);
+  }
+  
   const args = parseArgs(argv);
 
   // ── Config subcommand ─────────────────────────────────────────────────────────
