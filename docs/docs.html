@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="night">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ContextFS - Full Documentation</title>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', monospace; }
+    .code-block { background-color: #1e293b; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin: 1rem 0; }
+    .section-spacing { margin: 3rem 0; }
+    .table-container { overflow-x: auto; margin: 1rem 0; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { padding: 0.75rem; border: 1px solid #334155; text-align: left; }
+    th { background-color: #334155; }
+  </style>
+</head>
+<body class="bg-base-300 min-h-screen text-base-content">
+  <div class="container mx-auto px-4 py-8 max-w-6xl">
+    <!-- Header -->
+    <header class="mb-12">
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold">ContextFS Documentation</h1>
+        <a href="index.html" class="btn btn-outline">Back to Home</a>
+      </div>
+      <nav class="navbar bg-base-200 rounded-lg p-4">
+        <ul class="flex gap-4 flex-wrap">
+          <li><a href="#overview" class="link">Overview</a></li>
+          <li><a href="#architecture" class="link">Architecture</a></li>
+          <li><a href="#quick-start" class="link">Quick Start</a></li>
+          <li><a href="#cli-reference" class="link">CLI Reference</a></li>
+          <li><a href="#mcp-integration" class="link">MCP Integration</a></li>
+          <li><a href="#tools-reference" class="link">Tools Reference</a></li>
+          <li><a href="#rest-api" class="link">REST API</a></li>
+          <li><a href="#security" class="link">Security Model</a></li>
+          <li><a href="#environment-vars" class="link">Environment Variables</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <!-- Overview -->
+    <section id="overview" class="section-spacing">
+      <h2 class="text-2xl font-semibold mb-4">Overview</h2>
+      <p class="mb-4">ContextFS gives LLM agents a <strong>persistent, structured filesystem</strong> they can read from, write to, and search — without giving them direct access to your machine.</p>
+      <p>It exposes a standard <strong>MCP (Model Context Protocol)</strong> surface over SSE or stdio, so any MCP-compatible LLM client (Claude Desktop, Cursor, custom agents) can use it out of the box.</p>
+    </section>
+
+    <!-- Architecture -->
+    <section id="architecture" class="section-spacing">
+      <h2 class="text-2xl font-semibold mb-4">Architecture</h2>
+      <div class="code-block mb-4">
+<pre>graph TD
+    Agent[LLM Agent] -->|MCP SSE/Stdio| Server[ContextFS Server]
+    Server -->|WebSocket| WS1[WS Client A]
+    Server -->|WebSocket| WS2[WS Client B]
+    WS1 -->|Sandboxed| FS1[Workspace A1]
+    WS1 -->|Sandboxed| FS2[Workspace A2]</pre>
+      </div>
+      <p class="mb-2">ContextFS follows a <strong>Hub-and-Spoke</strong> architecture:</p>
+      <ul class="list-disc pl-6 mb-4 space-y-2">
+        <li><strong>Server (Hub)</strong>: Manages authentication, virtual client registration, and sticky scheduling.</li>
+        <li><strong>WS Client (Spoke)</strong>: Physically executes tool calls in a sandboxed environment.</li>
+        <li><strong>Local Mode</strong>: For single-machine use, the server acts as its own spoke.</li>
+      </ul>
+    </section>
+
+    <!-- Quick Start -->
+    <section id="quick-start" class="section-spacing">
+      <h2 class="text-2xl font-semibold mb-4">Quick Start</h2>
+      
+      <h3 class="text-xl font-medium mb-2">Option A — Local mode (simplest, single machine)</h3>
+      <div class="code-block mb-4">
+<pre>npx contextfs server --local --mcp sse</pre>
+      </div>
+      
+      <div class="code-block mb-4">
+<pre># Create a virtual client
+curl -s -X POST http://localhost:3010/api/virtual-clients \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"my-agent"}' | jq .
+# → copy "id" and "apiKey"
+
+# Open dashboard
+open http://localhost:3010
+
+# Chat
+CONTEXTFS_VC_ID=<id> CONTEXTFS_VC_KEY=<key> OPENROUTER_API_KEY=sk-or-... \
+  npx contextfs chat --mcp-server http://localhost:3010</pre>
+      </div>
+
+      <h3 class="text-xl font-medium mb-2">Option B — Remote WS client mode</h3>
+      <div class="code-block mb-4">
+<pre># Terminal 1 — server
+npx contextfs server --mcp sse
+
+# Terminal 2 — create entities
+curl -s -X POST http://localhost:3010/api/ws-clients \
+  -H 'Content-Type: application/json' -d '{"name":"worker-1"}' | jq .
+# → copy wsc id + apiKey
+
+curl -s -X POST http://localhost:3010/api/virtual-clients \
+  -H 'Content-Type: application/json' -d '{"name":"agent-1"}' | jq .
+# → copy vc id + apiKey
+
+# Terminal 3 — WS client (can be on a different machine)
+CONTEXTFS_API_KEY=<wsc-key> \
+  npx contextfs client \
+    --url ws://localhost:3010 \
+    --ws-client-id <wsc-id> \
+    --api-key <wsc-key>
+
+# Terminal 4 — chat
+CONTEXTFS_VC_ID=<vc-id> CONTEXTFS_VC_KEY=<vc-key> OPENROUTER_API_KEY=sk-or-... \
+  npx contextfs chat --mcp-server http://localhost:3010</pre>
+      </div>
+    </section>
+
+    <!-- CLI Reference -->
+    <section id="cli-reference" class="section-spacing">
+      <h2 class="text-2xl font-semibold mb-4">CLI Reference</h2>
+      
+      <h3 class="text-xl font-medium mb-2">`contextfs server`</h3>
+      <div class="code-block mb-4">
+<pre>contextfs server [options]
+
+Options:
+  --port <port>       HTTP + WS port (default: 3010, env: PORT)
+  --local             Local mode: tools run in-process, no WS clients (env: CONTEXTFS_LOCAL=1)
+  --mcp [sse]         Enable MCP server
+                        (default: stdio — requires --vc-id + --vc-key)
+                        (sse — VC creds per-connection: ?vcId=&vcKey= or headers)
+  --vc-id <id>        Virtual client ID for stdio MCP (env: CONTEXTFS_VC_ID)
+  --vc-key <key>      Virtual client API key for stdio MCP (env: CONTEXTFS_VC_KEY)
+  --insecure          Enable contextfs.bash_script_once tool
+  --verbose           Verbose logging</pre>
+      </div>
+
+      <h3 class="text-xl font-medium mb-2">`contextfs client`</h3>
+      <div class="code-block mb-4">
+<pre>contextfs client [options]
+
+Options:
+  --url <wsUrl>         Server WebSocket URL (required, env: CONTEXTFS_SERVER_URL)
+  --ws-client-id <id>   WS client ID (required, env: CONTEXTFS_WS_CLIENT_ID)
+  --api-key <key>       WS client API key (required, env: CONTEXTFS_API_KEY)
+  --cwd <path>          Workspace root (default: ~/.contextfs/workspaces/<wsc-id>)
+  --insecure            Enable contextfs.bash_script_once
+  --verbose             Verbose logging</pre>
+      </div>
+
+      <h3 class="text-xl font-medium mb-2">`contextfs chat`</h3>
+      <div class="code-block mb-4">
+<pre>contextfs chat [options]
+
+Options:
+  --mcp-server <url>    MCP server base URL (default: http://localhost:3010)
+  --vc-id <id>          Virtual client ID (env: CONTEXTFS_VC_ID)
+  --vc-key <key>        Virtual client API key (env: CONTEXTFS_VC_KEY)
+  --model <model>       LLM model via OpenRouter (env: CONTEXTFS_MODEL)
+  --message <text>      Non-interactive: send single message, exit 0 (alias: -m)
+  --stdin               Read message from stdin
+  --output json         Output { message, toolCalls, durationMs } JSON
+  --no-tools            Disable tool calls (pure LLM)
+  --verbose             Verbose logging</pre>
+      </div>
+      <p class="mb-4">Interactive commands: `/exit`, `/clear`, `/tools`, `/history`</p>
+    </section>
+
+    <!-- MCP Integration -->
+    <section id="mcp-integration" class="section-spacing">
+      <h2 class="text-2xl font-semibold mb-4">MCP Integration</h2>
+      
+      <h3 class="text-xl font-medium mb-2">SSE (recommended for web/agent use)</h3>
+      <div class="code-block mb-4">
+<pre>GET http://localhost:3010/mcp/sse?vcId=<id>&vcKey=<key>
+POST http://localhost:3010/mcp/message?sessionId=<sessionId></pre>
+      </div>
+      
+      <p class="mb-2">Or via headers:</p>
+      <div class="code-block mb-4">
+<pre>GET http://localhost:3010/mcp/sse
+X-VC-ID: <id>
+Authorization: Bearer <key></pre>
+      </div>
+
+      <h3 class="text-xl font-medium mb-2">stdio (for Claude Desktop, Cursor, etc.)</h3>
+      <div class="code-block mb-4">
+<pre>{
+  "mcpServers": {
+    "contextfs": {
+      "command": "npx",
+      "args": ["contextfs", "server", "--local", "--mcp", "--vc-id", "<id>", "--vc-key", "<key>"]
+    }
+  }
+}</pre>
+      </div>
+    </section>
+
+    <!-- Tools Reference -->
+    <section id="tools-reference" class="section-spacing">
+      <h2 class="text-2xl font-semibold mb-4">Tools Reference</h2>
+      <p class="mb-4">All tools are sandboxed within the virtual client's active workspace root.</p>
+      
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Tool</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>`contextfs.list`</td>
+              <td>List files/directories. Supports recursive, depth, glob filter.</td>
+            </tr>
+            <tr>
+              <td>`contextfs.read`</td>
+              <td>Read file content. Supports line ranges and byte limits.</td>
+            </tr>
+            <tr>
+              <td>`contextfs.write`</td>
+              <td>Write or append to a file.</td>
+            </tr>
+            <tr>
+              <td>`contextfs.list_workspaces`</td>
+              <td>List available workspaces for the current virtual client.</td>
+            </tr>
+            <tr>
+              <td>`contextfs.use_workspace`</td>
+              <td>Switch the active workspace for the current session.</td>
+            </tr>
+            <tr>
+              <td>`contextfs.save_skill`</td>
+              <td>Save a reusable skill as Markdown under `/skills/`.</td>
+            </tr>
+            <tr>
+              <td>`contextfs.list_skills`</td>
+              <td>List skills, optionally filtered by tag.</td>
+            </tr>
+            <tr>
+              <td>`contextfs.save_memory`</td>
+              <td>Persist a memory entry under `/memory/YYYY/MM/`.</td>
+            </tr>
+            <tr>
+              <td>`contextfs.search_memory`</td>
+              <td>Full-text keyword search across all memory files.</td>
+            </tr>
+            <tr>
+              <td>`contextfs.bash_script_once`</td>
+              <td>Execute a one-shot bash script (requires `--insecure`).</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- REST API Reference -->
+    <section id="rest-api" class="section-spacing">
+      <h2 class="text-2xl font-semibold mb-4">REST API reference</h2>
+      <p class="mb-2">Base URL: `http://localhost:3010/api`</p>
+      
+      <h3 class="text-lg font-medium mb-2">WS Clients</h3>
+      <div class="code-block mb-4">
+<pre>GET    /api/ws-clients                        List all WS clients
+POST   /api/ws-clients                        Create WS client → returns apiKey (once)
+DELETE /api/ws-clients/:id                    Delete WS client
+POST   /api/ws-clients/:id/regen-key          Regenerate API key → returns new apiKey</pre>
+      </div>
+
+      <h3 class="text-lg font-medium mb-2">Virtual Clients</h3>
+      <div class="code-block mb-4">
+<pre>GET    /api/virtual-clients                   List all virtual clients
+POST   /api/virtual-clients                   Create virtual client → returns apiKey (once)
+DELETE /api/virtual-clients/:id               Delete virtual client + owned workspaces
+POST   /api/virtual-clients/:id/regen-key     Regenerate API key</pre>
+      </div>
+
+      <h3 class="text-lg font-medium mb-2">Workspaces</h3>
+      <div class="code-block mb-4">
+<pre>GET    /api/virtual-clients/:vcId/workspaces              List workspaces
+POST   /api/virtual-clients/:vcId/workspaces              Create workspace
+DELETE /api/virtual-clients/:vcId/workspaces/:wsId        Delete workspace</pre>
+      </div>
+
+      <h3 class="text-lg font-medium mb-2">Dispatch</h3>
+      <div class="code-block mb-4">
+<pre>POST /api/dispatch
+Body: { virtualClientId, virtualClientApiKey, tool, params, timeoutMs? }</pre>
+      </div>
+      <p class="mb-4">Dispatches a tool call to the assigned WS client and waits for the response.</p>
+
+      <h3 class="text-lg font-medium mb-2">Status + MCP</h3>
+      <div class="code-block mb-4">
+<pre>GET /api/status          Summary counts
+GET /mcp/sessions        Active MCP SSE sessions</pre>
+      </div>
+    </section>
+
+    <!-- Security Model -->
+    <section id="security" class="section-spacing">
+      <h2 class="text-2xl font-semibold mb-4">Security model</h2>
+      <ul class="list-disc pl-6 mb-4 space-y-2">
+        <li><strong>WS client API keys</strong> — authenticate each WS connection. Validated on every WebSocket message.</li>
+        <li><strong>Virtual client API keys</strong> — authenticate MCP sessions (`?vcKey=`) and REST dispatch calls. Each virtual client is fully isolated from others.</li>
+        <li><strong>Path sandboxing</strong> — all file operations are resolved within the workspace root. Any path traversal attempt (`../`) returns an error.</li>
+        <li><strong>`bash_script_once`</strong> — disabled by default. Requires explicit `--insecure` flag on both server and client.</li>
+        <li><strong>API keys are shown only once</strong> — on creation and on regen. Store them immediately.</li>
+      </ul>
+    </section>
+
+    <!-- Data Directory -->
+    <section class="section-spacing">
+      <h2 class="text-2xl font-semibold mb-4">Data directory</h2>
+      <p class="mb-4">All state is persisted to `~/.contextfs/`:</p>
+      <div class="code-block mb-4">
+<pre>~/.contextfs/
+├── ws-clients.json         WS client registry
+├── virtual-clients.json    Virtual client registry
+├── workspaces.json         Workspace registry
+├── chat-config.json        Chat TUI config (API key, model)
+├── .machine-id             Persistent client identity
+└── workspaces/
+    └── <vcId>/
+        └── <wsId>/
+            ├── skills/     Saved skills (.md files)
+            ├── memory/     Memory entries (YYYY/MM/*.md)
+            └── ...         Your files</pre>
+      </div>
+    </section>
+
+    <!-- Environment Variables -->
+    <section id="environment-vars" class="section-spacing">
+      <h2 class="text-2xl font-semibold mb-4">Environment variables</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Variable</th>
+              <th>Description</th>
+              <th>Default</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>`PORT`</td>
+              <td>Server HTTP port</td>
+              <td>`3010`</td>
+            </tr>
+            <tr>
+              <td>`CONTEXTFS_LOCAL`</td>
+              <td>Enable local mode (`1`)</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>`CONTEXTFS_INSECURE`</td>
+              <td>Enable bash_script_once (`1`)</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>`CONTEXTFS_SERVER_URL`</td>
+              <td>WS server URL for client</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>`CONTEXTFS_WS_CLIENT_ID`</td>
+              <td>WS client ID</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>`CONTEXTFS_API_KEY`</td>
+              <td>WS client API key</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>`CONTEXTFS_VC_ID`</td>
+              <td>Virtual client ID for chat/MCP</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>`CONTEXTFS_VC_KEY`</td>
+              <td>Virtual client API key for chat/MCP</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>`CONTEXTFS_MCP_SERVER`</td>
+              <td>MCP server base URL for chat</td>
+              <td>`http://localhost:3010`</td>
+            </tr>
+            <tr>
+              <td>`CONTEXTFS_MODEL`</td>
+              <td>LLM model for chat</td>
+              <td>`google/gemini-2.5-flash-preview`</td>
+            </tr>
+            <tr>
+              <td>`OPENROUTER_API_KEY`</td>
+              <td>OpenRouter API key for chat</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>`VERBOSE`</td>
+              <td>Enable verbose logging (`1`)</td>
+              <td>—</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Requirements -->
+    <section class="section-spacing">
+      <h2 class="text-2xl font-semibold mb-4">Requirements</h2>
+      <ul class="list-disc pl-6 mb-4 space-y-2">
+        <li>Node.js ≥ 18</li>
+        <li>No build step required</li>
+        <li>No native modules</li>
+      </ul>
+    </section>
+
+    <!-- License -->
+    <section class="section-spacing">
+      <h2 class="text-2xl font-semibold mb-4">License</h2>
+      <p>ISC © <a href="https://intrane.fr" class="link">Javier Leandro Arancibia</a></p>
+    </section>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 border-t border-base-content/20 text-center opacity-70">
+      <a href="index.html" class="btn btn-outline mb-4">Back to Home</a>
+      <p>© 2026 Javier Leandro Arancibia — <a href="https://intrane.fr" class="link">intrane.fr</a></p>
+      <p class="text-sm mt-2">ISC License</p>
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "compose-client-1": {
+    "id": "compose-client-1",
+    "name": "Compose Client",
+    "description": "Local development client",
+    "apiKey": "local-dev-key",
+    "status": "offline",
+    "createdAt": "2026-02-27T00:00:00.000Z",
+    "lastHeartbeat": "2026-02-27T13:38:18.155Z",
+    "lastError": null,
+    "capability": {
+      "cpuLoad": [
+        1.95,
+        1.43,
+        1.73
+      ],
+      "totalMemMb": 31837,
+      "freeMemMb": 11575,
+      "cpuCount": 8,
+      "vcCount": 0,
+      "wsCount": 0
+    }
+  }
+}

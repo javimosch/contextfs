@@ -1,0 +1,61 @@
+{
+  "name": "contextfs",
+  "version": "1.0.0",
+  "description": "Context filesystem server/client for LLM agents — MCP-compatible, multi-tenant, zero-dependency dashboard",
+  "type": "commonjs",
+  "main": "index.js",
+  "bin": {
+    "contextfs": "./bin/contextfs.js"
+  },
+  "scripts": {
+    "start:server": "node bin/contextfs.js server",
+    "start:client": "node bin/contextfs.js client",
+    "start:chat": "node bin/contextfs.js chat",
+    "test": "jest --testPathPattern=__tests__"
+  },
+  "files": [
+    "bin/",
+    "client/",
+    "chat/",
+    "server/",
+    "shared/",
+    "docs/",
+    "README.md"
+  ],
+  "keywords": [
+    "mcp",
+    "llm",
+    "agent",
+    "filesystem",
+    "context",
+    "openrouter",
+    "websocket",
+    "sse"
+  ],
+  "author": {
+    "name": "Javier Leandro Arancibia",
+    "email": "arancibiajav@gmail.com",
+    "url": "https://intrane.fr"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/intrane/contextfs"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/__tests__/**/*.test.js"
+    ]
+  }
+}

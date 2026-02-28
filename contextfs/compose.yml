@@ -1,0 +1,59 @@
+name: contextfs
+
+services:
+  server:
+    build:
+      context: ..
+      dockerfile: contextfs/Dockerfile
+      target: runtime-base
+    image: contextfs/client:base
+    container_name: contextfs-server
+    working_dir: /app
+    volumes:
+      # Mount entire project for live code updates
+      - ..:/app
+      # Mount data directory for registry persistence
+      - ./data:/root/.contextfs
+    environment:
+      - PORT=3010
+      - VERBOSE=1
+    ports:
+      # Expose server port for potential external connections
+      - "3015:3010"
+    networks:
+      - contextfs
+    command: node bin/contextfs.js server --port 3010 --insecure --verbose
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3010/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  client:
+    build:
+      context: ..
+      dockerfile: contextfs/Dockerfile
+      target: runtime-full
+    image: contextfs/client:full
+    container_name: contextfs-client
+    depends_on:
+      server:
+        condition: service_healthy
+    volumes:
+      # Mount workspace directory for client operations
+      - ./workspace:/workspace
+      # Optionally mount contextfs home for config persistence
+      # - ~/.contextfs:/.contextfs
+    environment:
+      - CONTEXTFS_SERVER_URL=ws://server:3010
+      - CONTEXTFS_API_KEY=local-dev-key
+      - CONTEXTFS_WS_CLIENT_ID=compose-client-1
+      - VERBOSE=1
+    networks:
+      - contextfs
+    command: node /app/bin/contextfs.js client --url ws://server:3010 --ws-client-id compose-client-1 --api-key local-dev-key --verbose
+
+networks:
+  contextfs:
+    driver: bridge

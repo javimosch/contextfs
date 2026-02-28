@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="night">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ContextFS - LLM Agent Context Filesystem</title>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', monospace; }
+    .code-block { background-color: #1e293b; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; }
+    .section-spacing { margin: 2rem 0; }
+  </style>
+</head>
+<body class="bg-base-300 min-h-screen text-base-content">
+  <div class="container mx-auto px-4 py-8 max-w-6xl">
+    <!-- Header -->
+    <header class="mb-12 text-center">
+      <h1 class="text-4xl font-bold mb-4">ContextFS</h1>
+      <p class="text-xl opacity-80 mb-6">**Context filesystem server/client for LLM agents** — MCP-compatible, multi-tenant, zero-dependency dashboard</p>
+      <div class="flex gap-4 justify-center">
+        <a href="docs.html" class="btn btn-primary">View Full Documentation</a>
+      </div>
+    </header>
+
+    <!-- Overview -->
+    <section class="section-spacing">
+      <h2 class="text-2xl font-semibold mb-4">What is ContextFS?</h2>
+      <p class="mb-4">ContextFS gives LLM agents a <strong>persistent, structured filesystem</strong> they can read from, write to, and search — without giving them direct access to your machine.</p>
+      <p>It exposes a standard <strong>MCP (Model Context Protocol)</strong> surface over SSE or stdio, so any MCP-compatible LLM client (Claude Desktop, Cursor, custom agents) can use it out of the box.</p>
+    </section>
+
+    <!-- Key Concepts -->
+    <section class="section-spacing">
+      <h2 class="text-2xl font-semibold mb-4">Key Concepts</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="card bg-base-100 p-4">
+          <h3 class="font-bold">WS Client</h3>
+          <p>A machine/process that physically executes tool calls. Connects to the server via WebSocket.</p>
+        </div>
+        <div class="card bg-base-100 p-4">
+          <h3 class="font-bold">Virtual Client</h3>
+          <p>A logical tenant (agent, user, project). Has its own API key, workspace, skills, and memory.</p>
+        </div>
+        <div class="card bg-base-100 p-4">
+          <h3 class="font-bold">Workspace</h3>
+          <p>A directory scoped to a virtual client. All file operations are sandboxed within it.</p>
+        </div>
+        <div class="card bg-base-100 p-4">
+          <h3 class="font-bold">Local mode</h3>
+          <p>Server executes tools in-process — no WS client needed. Ideal for single-machine use.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Start -->
+    <section class="section-spacing">
+      <h2 class="text-2xl font-semibold mb-4">Quick Start</h2>
+      
+      <h3 class="text-xl font-medium mb-2">Option A — Local mode (simplest, single machine)</h3>
+      <div class="code-block mb-4">
+        <pre>npx contextfs server --local --mcp sse</pre>
+      </div>
+      
+      <div class="code-block mb-4">
+<pre># Create a virtual client
+curl -s -X POST http://localhost:3010/api/virtual-clients \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"my-agent"}' | jq .
+# → copy "id" and "apiKey"
+
+# Open dashboard
+open http://localhost:3010
+
+# Chat
+CONTEXTFS_VC_ID=<id> CONTEXTFS_VC_KEY=<key> OPENROUTER_API_KEY=sk-or-... \
+  npx contextfs chat --mcp-server http://localhost:3010</pre>
+      </div>
+
+      <div class="flex justify-center mt-8">
+        <a href="docs.html" class="btn btn-outline btn-lg">View Full Documentation for More Details</a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 border-t border-base-content/20 text-center opacity-70">
+      <p>© 2026 Javier Leandro Arancibia — <a href="https://intrane.fr" class="link">intrane.fr</a></p>
+      <p class="text-sm mt-2">ISC License</p>
+    </footer>
+  </div>
+</body>
+</html>
