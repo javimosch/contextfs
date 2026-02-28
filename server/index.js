@@ -18,6 +18,37 @@ const { createLocalAdapter, createLocalOnlyRegistry, createLocalOnlyScheduler } 
 
 // ── Parse CLI args ────────────────────────────────────────────────────────────
 const argv = process.argv.slice(3); // skip 'node', 'contextfs.js', 'server'
+
+// Handle --help early
+if (argv.includes('--help') || argv.includes('-h')) {
+  console.log(`
+contextfs server — Start the ContextFS server
+
+Usage:
+  contextfs server [options]
+
+Options:
+  --port <port>       Port to listen on (default: 3010, env: PORT)
+  --local             Local mode: tools run in-process, no WS clients
+  --mcp [transport]   Enable MCP server (stdio or sse)
+  --vc-id <id>        Virtual client ID for stdio MCP
+  --vc-key <key>      Virtual client API key for stdio MCP
+  --insecure          Enable bash_script_once tool
+  --verbose           Enable verbose logging
+
+MCP Transport:
+  --mcp               Use stdio transport (requires --vc-id and --vc-key)
+  --mcp sse           Use SSE transport (credentials per-connection)
+
+Examples:
+  contextfs server
+  contextfs server --port 3010 --insecure
+  contextfs server --mcp --vc-id vc1 --vc-key secret
+  contextfs server --mcp sse
+`);
+  process.exit(0);
+}
+
 function getArg(name, defaultVal) {
   const idx = argv.indexOf(`--${name}`);
   if (idx !== -1 && argv[idx + 1] && !argv[idx + 1].startsWith('--')) {

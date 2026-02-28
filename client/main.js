@@ -72,8 +72,35 @@ function processExit(code) {
 }
 
 async function main() {
+  // Handle --help early
+  const rawArgs = process.argv.slice(3);
+  if (rawArgs.includes('--help') || rawArgs.includes('-h')) {
+    console.log(`
+contextfs client — Connect to ContextFS server as a worker
+
+Usage:
+  contextfs client --url <wsUrl> --ws-client-id <id> --api-key <key> [options]
+
+Required:
+  --url <wsUrl>       Server WebSocket URL (env: CONTEXTFS_SERVER_URL)
+  --ws-client-id <id> WS client ID (env: CONTEXTFS_WS_CLIENT_ID)
+  --api-key <key>     API key for WS authentication (env: CONTEXTFS_API_KEY)
+
+Options:
+  --docker            Run client inside Docker container
+  --cwd <path>        Workspace root path (default: ~/.contextfs/workspaces/)
+  --insecure          Enable bash_script_once execution
+  --verbose           Enable verbose logging
+
+Examples:
+  contextfs client --url ws://localhost:3010 --ws-client-id worker1 --api-key secret
+  contextfs client --docker --url ws://host.docker.internal:3010 --ws-client-id worker1 --api-key secret
+`);
+    process.exit(0);
+  }
+  
   // Skip first two args (node, contextfs.js) and subcommand ('client')
-  const rawArgv = ['', '', ...process.argv.slice(3)];
+  const rawArgv = ['', '', ...rawArgs];
   const args = parseArgs(rawArgv);
 
   const serverUrl = args['url'] || getEnv('SERVER_URL');
