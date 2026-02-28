@@ -106,6 +106,7 @@ progress:
 | 23 | fix stdio mode to use --local flag so no ws client is required | 2026-02-28 | 275e411 | [23-fix-stdio-mode-to-use-local-flag-so-no-w](./quick/23-fix-stdio-mode-to-use-local-flag-so-no-w/) |
 | 24 | make help available at any command level | 2026-02-28 | 7dd128c | [24-make-help-available-at-any-command-level](./quick/24-make-help-available-at-any-command-level/) |
 | 25 | add --cwd support to server local command | 2026-02-28 | 837cfcd | [25-add-cwd-support-to-server-local-command-](./quick/25-add-cwd-support-to-server-local-command-/) |
+| 26 | support showing cost alongside tokens usage | 2026-02-28 | 25121da | [26-support-showing-cost-alongside-tokens-us](./quick/26-support-showing-cost-alongside-tokens-us/) |
 ### Todos
 - [x] Implement Agent-Managed Workspaces (Phase 05.1).
 - [x] Create consolidated README and migration guide (Phase 06).
@@ -118,5 +119,5 @@ progress:
 
 ## Session Continuity
 
-- **Last Action**: Completed Quick Task 25 - Add --cwd support to server local command.
+- **Last Action**: Completed Quick Task 26 - Support showing cost alongside tokens usage.
 - **Next Step**: Start Phase 08.
