@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const readline = require('readline');
+const crypto = require('crypto');
 
 const CONTEXTFS_HOME = path.join(os.homedir(), '.contextfs');
 const CONFIG_PATH = path.join(CONTEXTFS_HOME, 'chat-config.json');
@@ -81,13 +82,31 @@ function prompt(question, { silent = false } = {}) {
 }
 
 /**
+ * Generate a new Virtual Client ID.
+ */
+function generateVcId() {
+  return crypto.randomBytes(12).toString('hex');
+}
+
+/**
+ * Generate a new Virtual Client API key.
+ */
+function generateVcKey() {
+  return 'cfs_' + crypto.randomBytes(24).toString('hex');
+}
+
+/**
  * Bootstrap: ensure we have an OpenRouter API key.
  * - Check OPENROUTER_API_KEY env first.
  * - Then check config file.
  * - If missing, prompt the user and persist.
+ * 
+ * When spawn is true and VC credentials are missing, auto-provision them
+ * instead of prompting (for MCP stdio mode).
+ * 
  * Returns { apiKey, model, maxTokens, temperature, vcId, vcKey }
  */
-async function bootstrapConfig({ model, maxTokens, temperature, vcId: vcIdArg, vcKey: vcKeyArg } = {}) {
+async function bootstrapConfig({ model, maxTokens, temperature, vcId: vcIdArg, vcKey: vcKeyArg, spawn = false } = {}) {
   const config = loadConfig();
 
   // API key resolution order: env → config → prompt
@@ -112,15 +131,21 @@ async function bootstrapConfig({ model, maxTokens, temperature, vcId: vcIdArg, v
     process.stderr.write(`[Chat] API key saved to ${CONFIG_PATH}\n`);
   }
 
-  // VC credentials resolution order: arg → env → config → prompt
+  // VC credentials resolution order: arg → env → config → auto-generate (if spawn) → prompt
   let vcId = vcIdArg || process.env.CONTEXTFS_VC_ID || config.vcId || '';
   let vcKey = vcKeyArg || process.env.CONTEXTFS_VC_KEY || config.vcKey || '';
 
   let needsSave = false;
 
   if (!vcId) {
-    process.stderr.write('\n[Chat] No Virtual Client ID (vcId) found.\n');
-    vcId = await prompt('Enter your Virtual Client ID: ');
+    if (spawn) {
+      // Auto-provision for --spawn mode (stdio MCP)
+      vcId = generateVcId();
+      process.stderr.write(`[Chat] Auto-provisioned Virtual Client ID: ${vcId}\n`);
+    } else {
+      process.stderr.write('\n[Chat] No Virtual Client ID (vcId) found.\n');
+      vcId = await prompt('Enter your Virtual Client ID: ');
+    }
     if (vcId) {
       config.vcId = vcId;
       needsSave = true;
@@ -128,8 +153,14 @@ async function bootstrapConfig({ model, maxTokens, temperature, vcId: vcIdArg, v
   }
 
   if (!vcKey) {
-    process.stderr.write('\n[Chat] No Virtual Client Key (vcKey) found.\n');
-    vcKey = await prompt('Enter your Virtual Client Key: ');
+    if (spawn) {
+      // Auto-provision for --spawn mode (stdio MCP)
+      vcKey = generateVcKey();
+      process.stderr.write(`[Chat] Auto-provisioned Virtual Client Key: ${vcKey.slice(0, 8)}...\n`);
+    } else {
+      process.stderr.write('\n[Chat] No Virtual Client Key (vcKey) found.\n');
+      vcKey = await prompt('Enter your Virtual Client Key: ');
+    }
     if (vcKey) {
       config.vcKey = vcKey;
       needsSave = true;
