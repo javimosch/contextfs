@@ -156,13 +156,40 @@ async function bootstrapConfig({ model, maxTokens, temperature, vcId: vcIdArg, v
   };
 }
 
-module.exports = { bootstrapConfig, loadConfig, saveConfig, mergeConfig, prompt, CONFIG_PATH, CONTEXTFS_HOME };
+module.exports = { bootstrapConfig, loadConfig, saveConfig, mergeConfig, validateConfigKeys, prompt, CONFIG_PATH, CONTEXTFS_HOME };
+
+/**
+ * Supported config keys.
+ */
+const SUPPORTED_KEYS = ['model', 'maxTokens', 'temperature', 'apiKey', 'vcId', 'vcKey'];
+
+/**
+ * Validate config keys.
+ * Returns { valid: boolean, errors: string[] }
+ */
+function validateConfigKeys(updates) {
+  const errors = [];
+  for (const key of Object.keys(updates)) {
+    if (!SUPPORTED_KEYS.includes(key)) {
+      errors.push(`Unsupported config key: ${key}. Supported: ${SUPPORTED_KEYS.join(', ')}`);
+    }
+  }
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
+}
 
 /**
  * Deep merge updates into existing config and save.
  * Returns the merged config.
+ * Throws if any keys are unsupported.
  */
 function mergeConfig(updates) {
+  const validation = validateConfigKeys(updates);
+  if (!validation.valid) {
+    throw new Error(validation.errors.join('\n'));
+  }
   const existing = loadConfig();
   const merged = { ...existing };
   for (const [key, value] of Object.entries(updates)) {

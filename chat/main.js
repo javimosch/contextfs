@@ -195,10 +195,15 @@ Config file: ~/.contextfs/chat-config.json
     }
 
     if (Object.keys(updates).length > 0) {
-      const merged = mergeConfig(updates);
-      process.stdout.write('Config updated:\n');
-      process.stdout.write(JSON.stringify(merged, null, 2) + '\n');
-      process.exit(0);
+      try {
+        const merged = mergeConfig(updates);
+        process.stdout.write('Config updated:\n');
+        process.stdout.write(JSON.stringify(merged, null, 2) + '\n');
+        process.exit(0);
+      } catch (err) {
+        process.stderr.write(`Error: ${err.message}\n`);
+        process.exit(1);
+      }
     }
 
     // No args, show current config
