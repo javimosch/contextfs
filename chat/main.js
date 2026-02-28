@@ -42,13 +42,14 @@ function clearLine() {
   process.stdout.write('\r\x1b[K');
 }
 
-function printBanner(model, mcpServer) {
+function printBanner(model, mcpServer, baseUrl) {
   process.stdout.write('\n');
   process.stdout.write('╔══════════════════════════════════════════════╗\n');
   process.stdout.write('║       contextfs chat TUI  (type /exit)       ║\n');
   process.stdout.write('╚══════════════════════════════════════════════╝\n');
   process.stdout.write(`  Model  : ${model}\n`);
   process.stdout.write(`  Server : ${mcpServer}\n`);
+  process.stdout.write(`  API    : ${baseUrl.replace(/\/\/[^@]+@/, '//***@')}\n`);
   process.stdout.write('  Commands: /exit  /clear  /tools  /history  /reconnect\n');
   process.stdout.write('            contextfs chat config --help\n');
   process.stdout.write('\n');
@@ -146,7 +147,8 @@ Options:
   model         LLM model (e.g., google/gemini-2.5-flash-preview, anthropic/claude-3-5-sonnet)
   maxTokens     Max tokens to generate (default: 4096)
   temperature   Sampling temperature (default: 0.7)
-  apiKey        OpenRouter API key
+  apiKey        API key for the LLM provider
+  baseUrl       OpenAI-compatible API base URL (default: https://openrouter.ai/api/v1)
   vcId          Virtual Client ID
   vcKey         Virtual Client Key
 
@@ -216,6 +218,7 @@ Config file: ~/.contextfs/chat-config.json
   const vcIdArg = args['vc-id'] || process.env.CONTEXTFS_VC_ID || '';
   const vcKeyArg = args['vc-key'] || process.env.CONTEXTFS_VC_KEY || '';
   const modelArg = args['model'] || process.env.CONTEXTFS_MODEL;
+  const baseUrlArg = args['base-url'] || process.env.CONTEXTFS_BASE_URL;
   const verbose = args['verbose'] === true || process.env.VERBOSE === '1';
   const insecure = args['insecure'] === true;
   const timeoutMs = parseInt(args['timeout']) || 10000;
@@ -231,6 +234,7 @@ Config file: ~/.contextfs/chat-config.json
       model: modelArg,
       vcId: vcIdArg,
       vcKey: vcKeyArg,
+      baseUrl: baseUrlArg,
       spawn: shouldSpawn,
     });
   } catch (err) {
@@ -261,7 +265,7 @@ Config file: ~/.contextfs/chat-config.json
   const outputJson = args['output'] === 'json';
   const noTools = args['no-tools'] === true;
 
-  printBanner(cfg.model, serverInfo);
+  printBanner(cfg.model, serverInfo, cfg.baseUrl);
 
   // Connect to MCP server
   if (shouldSpawn) {
@@ -298,6 +302,7 @@ Config file: ~/.contextfs/chat-config.json
     model: cfg.model,
     maxTokens: cfg.maxTokens,
     temperature: cfg.temperature,
+    baseUrl: cfg.baseUrl,
   });
 
   // ── Non-interactive mode ────────────────────────────────────────────────────
@@ -377,7 +382,7 @@ Config file: ~/.contextfs/chat-config.json
     if (input === '/clear') {
       history.splice(1); // keep system prompt
       process.stdout.write('\x1b[2J\x1b[H');
-      printBanner(cfg.model, serverInfo);
+      printBanner(cfg.model, serverInfo, cfg.baseUrl);
       rl.resume(); rl.prompt(); return;
     }
 
