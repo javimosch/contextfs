@@ -56,6 +56,25 @@ RUN apk add --no-cache \
     curl \
     bash
 
+# Install RTK binary with multi-architecture support
+ARG RTK_VERSION=0.23.0
+ARG TARGETARCH
+
+RUN set -eux; \
+    case "${TARGETARCH}" in \
+        amd64) RTK_ARCH='x86_64' ;; \
+        arm64) RTK_ARCH='aarch64' ;; \
+        *) echo "Unsupported architecture: ${TARGETARCH}"; exit 1 ;; \
+    esac; \
+    RTK_URL="https://github.com/rtk-ai/rtk/releases/download/v${RTK_VERSION}/rtk-${RTK_ARCH}-unknown-linux-musl.tar.gz"; \
+    echo "Downloading RTK ${RTK_VERSION} for ${RTK_ARCH}..."; \
+    curl -fsSL -o /tmp/rtk.tar.gz "${RTK_URL}"; \
+    tar -xzf /tmp/rtk.tar.gz -C /usr/local/bin rtk; \
+    chmod +x /usr/local/bin/rtk; \
+    rm /tmp/rtk.tar.gz; \
+    # Verify installation
+    rtk --version
+
 # Inherit entrypoint and cmd from runtime-base
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["node", "/app/bin/contextfs.js", "client"]
