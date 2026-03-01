@@ -102,9 +102,16 @@ function runCommand({ cmd, args = [], cwd, env = {}, input = null, timeoutMs = 3
     const start = Date.now();
     const mergedEnv = { ...process.env, ...baselineEnv, ...env };
 
-    // Check if we should use RTK
+    // Handle native: prefix - strip it for native execution
+    let actualCmd = cmd;
+    let actualArgs = args;
+    if (cmd.startsWith('native:')) {
+      actualCmd = cmd.slice(7);
+    }
+
+    // Check if we should use RTK (only for commands without native: prefix)
     const wrapper = getSpawnWrapper();
-    if (wrapper && !args.includes('-c') && !cmd.includes('bash') && !cmd.includes('sh')) {
+    if (!cmd.startsWith('native:') && wrapper && !args.includes('-c') && !cmd.includes('bash') && !cmd.includes('sh')) {
       try {
         console.log(`[RTK] Using RTK for: ${cmd}`);
         const result = await wrapper.execute(cmd, args, { cwd, env: mergedEnv, timeout: timeoutMs });
@@ -119,13 +126,13 @@ function runCommand({ cmd, args = [], cwd, env = {}, input = null, timeoutMs = 3
         return;
       } catch (error) {
         console.log(`[RTK] Fallback to native: ${error.message}`);
-        // Fall through to native execution
+        // Fall through to native execution with actualCmd
       }
     }
 
     let proc;
     try {
-      proc = spawn(cmd, args, { cwd, env: mergedEnv, stdio: ['pipe', 'pipe', 'pipe'] });
+      proc = spawn(actualCmd, actualArgs, { cwd, env: mergedEnv, stdio: ['pipe', 'pipe', 'pipe'] });
     } catch (err) {
       return resolve({ code: 1, signal: null, stdout: '', stderr: err.message, durationMs: 0 });
     }
@@ -156,7 +163,14 @@ function runCommand({ cmd, args = [], cwd, env = {}, input = null, timeoutMs = 3
 
     proc.on('error', (err) => {
       if (timer) clearTimeout(timer);
-      resolve({ code: 1, signal: null, stdout, stderr: err.message, durationMs: Date.now() - start });
+      // Return appropriate exit code based on error type
+      let exitCode = 1;
+      if (err.code === 'ENOENT') {
+        exitCode = 127; // Command not found
+      } else if (err.code === 'EACCES' || err.code === 'EPERM') {
+        exitCode = 126; // Permission denied
+      }
+      resolve({ code: exitCode, signal: null, stdout, stderr: err.message, durationMs: Date.now() - start });
     });
 
     proc.on('close', (code, signal) => {
@@ -179,9 +193,16 @@ function runCommandStreaming({ cmd, args = [], cwd, env = {}, input = null, time
     const mergedEnv = { ...process.env, ...baselineEnv, ...env };
     let seq = 0;
 
-    // Check if we should use RTK (but not for shell commands with -c)
+    // Handle native: prefix - strip it for native execution
+    let actualCmd = cmd;
+    let actualArgs = args;
+    if (cmd.startsWith('native:')) {
+      actualCmd = cmd.slice(7);
+    }
+
+    // Check if we should use RTK (only for commands without native: prefix)
     const wrapper = getSpawnWrapper();
-    if (wrapper && !args.includes('-c') && !cmd.includes('bash') && !cmd.includes('sh')) {
+    if (!cmd.startsWith('native:') && wrapper && !args.includes('-c') && !cmd.includes('bash') && !cmd.includes('sh')) {
       try {
         console.log(`[RTK] Using RTK for: ${cmd}`);
         const result = await wrapper.execute(cmd, args, { cwd, env: mergedEnv, timeout: timeoutMs });
@@ -207,13 +228,13 @@ function runCommandStreaming({ cmd, args = [], cwd, env = {}, input = null, time
         return;
       } catch (error) {
         console.log(`[RTK] Fallback to native: ${error.message}`);
-        // Fall through to native execution
+        // Fall through to native execution with actualCmd
       }
     }
 
     let proc;
     try {
-      proc = spawn(cmd, args, { cwd, env: mergedEnv, stdio: ['pipe', 'pipe', 'pipe'] });
+      proc = spawn(actualCmd, actualArgs, { cwd, env: mergedEnv, stdio: ['pipe', 'pipe', 'pipe'] });
     } catch (err) {
       return resolve({ code: 1, signal: null, stdout: '', stderr: err.message, durationMs: 0 });
     }
@@ -249,7 +270,14 @@ function runCommandStreaming({ cmd, args = [], cwd, env = {}, input = null, time
 
     proc.on('error', (err) => {
       if (timer) clearTimeout(timer);
-      resolve({ code: 1, signal: null, stdout, stderr: err.message, durationMs: Date.now() - start });
+      // Return appropriate exit code based on error type
+      let exitCode = 1;
+      if (err.code === 'ENOENT') {
+        exitCode = 127; // Command not found
+      } else if (err.code === 'EACCES' || err.code === 'EPERM') {
+        exitCode = 126; // Permission denied
+      }
+      resolve({ code: exitCode, signal: null, stdout, stderr: err.message, durationMs: Date.now() - start });
     });
 
     proc.on('close', (code, signal) => {
