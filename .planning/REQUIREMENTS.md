@@ -86,40 +86,47 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 1 | Pending |
-| INFRA-02 | Phase 1 | Pending |
-| INFRA-03 | Phase 1 | Pending |
-| INFRA-04 | Phase 1 | Pending |
-| INFRA-05 | Phase 1 | Pending |
-| CONFIG-01 | Phase 2 | Pending |
-| CONFIG-02 | Phase 2 | Pending |
-| CONFIG-03 | Phase 2 | Pending |
-| CONFIG-04 | Phase 2 | Pending |
-| CORE-01 | Phase 3 | Pending |
-| CORE-02 | Phase 3 | Pending |
-| CORE-03 | Phase 3 | Pending |
-| CORE-04 | Phase 3 | Pending |
-| CORE-05 | Phase 3 | Pending |
-| CORE-06 | Phase 3 | Pending |
-| TEST-01 | Phase 4 | Pending |
-| TEST-02 | Phase 4 | Pending |
-| TEST-03 | Phase 4 | Pending |
-| TEST-04 | Phase 4 | Pending |
-| TEST-05 | Phase 4 | Pending |
-| ADV-01 | Phase 4 | Pending |
-| ADV-02 | Phase 4 | Pending |
-| ADV-03 | Phase 4 | Pending |
-| ADV-04 | Phase 4 | Pending |
-| ADV-05 | Phase 4 | Pending |
-| ERROR-01 | Phase 2 | Pending |
-| ERROR-02 | Phase 2 | Pending |
-| ERROR-03 | Phase 2 | Pending |
-| ERROR-04 | Phase 2 | Pending |
+| INFRA-01 | Phase 8 | Pending |
+| INFRA-02 | Phase 8 | Pending |
+| INFRA-03 | Phase 8 | Pending |
+| INFRA-04 | Phase 8 | Pending |
+| INFRA-05 | Phase 8 | Pending |
+| CONFIG-01 | Phase 9 | Pending |
+| CONFIG-02 | Phase 9 | Pending |
+| CONFIG-03 | Phase 9 | Pending |
+| CONFIG-04 | Phase 9 | Pending |
+| ERROR-01 | Phase 9 | Pending |
+| ERROR-02 | Phase 9 | Pending |
+| ERROR-03 | Phase 9 | Pending |
+| ERROR-04 | Phase 9 | Pending |
+| CORE-01 | Phase 10 | Pending |
+| CORE-02 | Phase 10 | Pending |
+| CORE-03 | Phase 10 | Pending |
+| CORE-04 | Phase 10 | Pending |
+| CORE-05 | Phase 10 | Pending |
+| CORE-06 | Phase 10 | Pending |
+| TEST-01 | Phase 11 | Pending |
+| TEST-02 | Phase 11 | Pending |
+| TEST-03 | Phase 11 | Pending |
+| TEST-04 | Phase 11 | Pending |
+| TEST-05 | Phase 11 | Pending |
+| ADV-01 | Phase 11 | Pending |
+| ADV-02 | Phase 11 | Pending |
+| ADV-03 | Phase 11 | Pending |
+| ADV-04 | Phase 11 | Pending |
+| ADV-05 | Phase 11 | Pending |
 
 **Coverage:**
 - v1 requirements: 29 total
 - Mapped to phases: 29
 - Unmapped: 0 ✓
+
+### Phase Groupings
+
+- **Phase 8** (Infrastructure): INFRA-01 through INFRA-05 (5 requirements)
+- **Phase 9** (Integration Layer): CONFIG-01 through CONFIG-04, ERROR-01 through ERROR-04 (8 requirements)
+- **Phase 10** (Core Commands): CORE-01 through CORE-06 (6 requirements)
+- **Phase 11** (Test + Advanced): TEST-01 through TEST-05, ADV-01 through ADV-05 (10 requirements)
 
 ---
 *Requirements defined: 2026-03-01*
