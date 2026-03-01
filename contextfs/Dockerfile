@@ -75,6 +75,15 @@ RUN set -eux; \
     # Verify installation
     rtk --version
 
+# Copy RTK helper scripts
+COPY scripts/rtk-shell-wrapper.sh /usr/local/bin/
+COPY scripts/healthcheck-rtk.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/rtk-shell-wrapper.sh /usr/local/bin/healthcheck-rtk.sh
+
+# Health check for RTK
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD /usr/local/bin/healthcheck-rtk.sh
+
 # Inherit entrypoint and cmd from runtime-base
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["node", "/app/bin/contextfs.js", "client"]
