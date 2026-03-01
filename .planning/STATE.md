@@ -93,11 +93,18 @@ None currently.
 
 ## Session Continuity
 
-**Last Action:** Roadmap creation for v1.1 milestone
+**Last Action:** Phase 8 context gathered — RTK installation method decided
 
-**Next Action:** `/gsd-plan-phase 8` to begin infrastructure setup
+**Next Action:** `/gsd-plan-phase 8` to create detailed execution plan
 
-**Context Hash:** `v1.1-rtk-initial`
+**Context Hash:** `v1.1-rtk-p8-context`
+
+**Recent Context:**
+- RTK binary: Download from GitHub releases
+- Verification: Basic executable test (`rtk --version`)
+- Architectures: x86_64 and aarch64
+- Install path: `/usr/local/bin/rtk`
+- Context file: `.planning/phases/08-infrastructure-docker-setup/08-CONTEXT.md`
 
 ---
 
