@@ -239,7 +239,8 @@ class RTKExecutor {
       'wc': ['wc', ...args],
       'find': ['find', ...args],
       'sort': ['sort', ...args],
-      'uniq': ['uniq', ...args]
+      'uniq': ['uniq', ...args],
+      'docker': ['docker', ...args]
     };
 
     return commandMappings[command] || [command, ...args];
