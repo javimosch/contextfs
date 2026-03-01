@@ -15,8 +15,7 @@
 
 | Phase | Focus | Value Delivery |
 |-------|-------|----------------|
-| 8 | Infrastructure & Docker Setup | RTK binary available in containers |
-| 9 | MCP Integration Layer | Configurable proxy with graceful fallback |
+| 8 | 1/2 | In Progress|  | 9 | MCP Integration Layer | Configurable proxy with graceful fallback |
 | 10 | Core Command Integration | 60-80% token savings on common commands |
 | 11 | Test Optimization & Advanced Features | 85-90% token savings on test output |
 
@@ -57,7 +56,17 @@
 4. Health check script passes for RTK installation and basic functionality
 5. Workspace-scoped RTK database directory exists at `/workspace/.rtk/`
 
-**Plans:** TBD
+**Plans:** 1/2 plans executed
+
+**Plan List:**
+- [ ] `08-01-PLAN.md` — RTK binary installation with multi-arch support (INFRA-01, INFRA-02)
+- [ ] `08-02-PLAN.md` — Shell wrapper, health checks, and workspace configuration (INFRA-03, INFRA-04, INFRA-05)
+
+**Wave Structure:**
+```
+Wave 1: 08-01 (RTK binary installation - no dependencies)
+Wave 2: 08-02 (Scripts and compose - depends on 08-01)
+```
 
 ---
 

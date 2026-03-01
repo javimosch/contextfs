@@ -9,8 +9,8 @@ Requirements for RTK integration milestone. Each maps to roadmap phases.
 
 ### Infrastructure
 
-- [ ] **INFRA-01**: RTK binary v0.23.0+ installed in runtime-full Docker stage
-- [ ] **INFRA-02**: Multi-arch support (x86_64, aarch64) for RTK binary
+- [x] **INFRA-01**: RTK binary v0.23.0+ installed in runtime-full Docker stage
+- [x] **INFRA-02**: Multi-arch support (x86_64, aarch64) for RTK binary
 - [ ] **INFRA-03**: Shell wrapper script (`rtk-shell-wrapper.sh`) with fallback logic
 - [ ] **INFRA-04**: Health check script verifying RTK installation and functionality
 - [ ] **INFRA-05**: Workspace-scoped RTK database configuration
@@ -86,8 +86,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 8 | Pending |
-| INFRA-02 | Phase 8 | Pending |
+| INFRA-01 | Phase 8 | Complete |
+| INFRA-02 | Phase 8 | Complete |
 | INFRA-03 | Phase 8 | Pending |
 | INFRA-04 | Phase 8 | Pending |
 | INFRA-05 | Phase 8 | Pending |
