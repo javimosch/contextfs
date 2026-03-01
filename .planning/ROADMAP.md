@@ -85,7 +85,19 @@ Wave 2: 08-02 (Scripts and compose - depends on 08-01)
 5. Error messages clearly distinguish between RTK errors, command errors, and native failures
 6. Commands with unsupported flags bypass RTK and execute natively
 
-**Plans:** TBD
+**Plans:** 4 plans created
+
+**Plan List:**
+- [ ] `09-01-PLAN.md` — Container initialization script with RTK detection and logging (CONFIG-03)
+- [ ] `09-02-PLAN.md` — Configuration module with boolean parsing and auto-detect (CONFIG-01, CONFIG-04)
+- [ ] `09-03-PLAN.md` — Error classification system with three-tier logic (ERROR-03)
+- [ ] `09-04-PLAN.md` — RTK executor with fallback, tee output, and allowlist (ERROR-01, ERROR-02, ERROR-04)
+
+**Wave Structure:**
+```
+Wave 1: 09-01, 09-02 (initialization and config - no dependencies)
+Wave 2: 09-03, 09-04 (error handling and executor - depends on config)
+```
 
 ---
 
@@ -145,8 +157,8 @@ Phase 11 (Test + Advanced)
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 1-7   | v1.0      | —              | ✓ Complete | 2026-02-27 |
-| 8     | v1.1      | 0/2            | ⏳ Not started | - |
-| 9     | v1.1      | 0/2            | ⏸️ Blocked | - |
+| 8     | v1.1      | 2/2            | ✓ Complete | 2026-03-01 |
+| 9     | v1.1      | 0/4            | ⏳ Planned | - |
 | 10    | v1.1      | 0/3            | ⏸️ Blocked | - |
 | 11    | v1.1      | 0/2            | ⏸️ Blocked | - |
 
