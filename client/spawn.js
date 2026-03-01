@@ -4,6 +4,40 @@ const { spawn, spawnSync } = require('child_process');
 const fs = require('fs');
 const { logVerbose } = require('./utils');
 
+// ── RTK Integration ───────────────────────────────────────────────────────────
+
+let spawnWrapper = null;
+
+// Lazy-load RTK components to avoid issues in non-container environments
+function getSpawnWrapper() {
+  if (spawnWrapper !== null) return spawnWrapper;
+
+  // Only initialize in container environment
+  if (!isContainerEnvironment()) {
+    spawnWrapper = false;
+    return spawnWrapper;
+  }
+
+  try {
+    const { SpawnWrapper } = require('../server/mcp/tools/spawn-wrapper.js');
+    const { RTKExecutor } = require('../server/mcp/tools/rtk-executor.js');
+    const { TokenTracker } = require('../server/mcp/tools/token-tracker.js');
+
+    const tokenTracker = new TokenTracker();
+    const rtkExecutor = new RTKExecutor();
+    spawnWrapper = new SpawnWrapper({ rtkExecutor, tokenTracker });
+
+    if (logVerbose) {
+      console.log('[RTK] SpawnWrapper initialized in container environment');
+    }
+  } catch (error) {
+    console.warn(`[RTK] Failed to initialize SpawnWrapper: ${error.message}`);
+    spawnWrapper = false;
+  }
+
+  return spawnWrapper;
+}
+
 // ── Container detection ───────────────────────────────────────────────────────
 
 let _isContainer = null;
@@ -64,9 +98,30 @@ const MAX_BUFFER = 200 * 1024; // 200 KB per stream
  * Returns { code, signal, stdout, stderr, durationMs }
  */
 function runCommand({ cmd, args = [], cwd, env = {}, input = null, timeoutMs = 30000, baselineEnv = {} }) {
-  return new Promise((resolve) => {
+  return new Promise(async (resolve) => {
     const start = Date.now();
     const mergedEnv = { ...process.env, ...baselineEnv, ...env };
+
+    // Check if we should use RTK
+    const wrapper = getSpawnWrapper();
+    if (wrapper && !args.includes('-c') && !cmd.includes('bash') && !cmd.includes('sh')) {
+      try {
+        console.log(`[RTK] Using RTK for: ${cmd}`);
+        const result = await wrapper.execute(cmd, args, { cwd, env: mergedEnv, timeout: timeoutMs });
+        const durationMs = Date.now() - start;
+        resolve({
+          code: result.exitCode,
+          signal: null,
+          stdout: result.stdout,
+          stderr: result.stderr,
+          durationMs
+        });
+        return;
+      } catch (error) {
+        console.log(`[RTK] Fallback to native: ${error.message}`);
+        // Fall through to native execution
+      }
+    }
 
     let proc;
     try {
@@ -119,10 +174,42 @@ function runCommand({ cmd, args = [], cwd, env = {}, input = null, timeoutMs = 3
  * Returns { code, signal, stdout, stderr, durationMs }
  */
 function runCommandStreaming({ cmd, args = [], cwd, env = {}, input = null, timeoutMs = 30000, baselineEnv = {}, onChunk }) {
-  return new Promise((resolve) => {
+  return new Promise(async (resolve) => {
     const start = Date.now();
     const mergedEnv = { ...process.env, ...baselineEnv, ...env };
     let seq = 0;
+
+    // Check if we should use RTK (but not for shell commands with -c)
+    const wrapper = getSpawnWrapper();
+    if (wrapper && !args.includes('-c') && !cmd.includes('bash') && !cmd.includes('sh')) {
+      try {
+        console.log(`[RTK] Using RTK for: ${cmd}`);
+        const result = await wrapper.execute(cmd, args, { cwd, env: mergedEnv, timeout: timeoutMs });
+        const durationMs = Date.now() - start;
+
+        // Emit chunks for streaming compatibility
+        if (typeof onChunk === 'function') {
+          if (result.stdout) {
+            onChunk({ chunk: result.stdout, stream: 'stdout', seq: seq++ });
+          }
+          if (result.stderr) {
+            onChunk({ chunk: result.stderr, stream: 'stderr', seq: seq++ });
+          }
+        }
+
+        resolve({
+          code: result.exitCode,
+          signal: null,
+          stdout: result.stdout,
+          stderr: result.stderr,
+          durationMs
+        });
+        return;
+      } catch (error) {
+        console.log(`[RTK] Fallback to native: ${error.message}`);
+        // Fall through to native execution
+      }
+    }
 
     let proc;
     try {
