@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: RTK Integration Summary
 status: unknown
-last_updated: "2026-03-01T18:30:28.416Z"
+last_updated: "2026-03-01T19:15:00.000Z"
 progress:
-  total_phases: 2
+  total_phases: 3
   completed_phases: 2
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 9
+  completed_plans: 7
 ---
 
 # Project State: ContextFS v1.1 RTK Integration
@@ -35,21 +35,21 @@ progress:
 
 | Field | Value |
 |-------|-------|
-| **Phase** | 9 |
-| **Phase Name** | MCP Integration Layer |
+| **Phase** | 10 |
+| **Phase Name** | Core Command Integration |
 | **Status** | In Progress |
 | **Plans Total** | 3 (planned) |
-| **Plans Complete** | 3 |
+| **Plans Complete** | 1 |
 
 **Progress Bar:**
 ```
-[████████████████████] 100% (Phase 9, Plan 3 of 3 complete)
+[████████░░░░░░░░░░░░] 33% (Phase 10, Plan 1 of 3 complete)
 ```
 
 **Completion:**
 - Phases Complete: 2/4
-- Requirements Complete: 4/29 (INFRA-01, INFRA-02, CONFIG-03, ERROR-03)
-- Overall: 44%
+- Requirements Complete: 5/29 (INFRA-01, INFRA-02, CONFIG-03, ERROR-03, CORE-06)
+- Overall: 45%
 
 ---
 
@@ -68,6 +68,7 @@ progress:
 | Phase 09-mcp-integration-layer P01 | 1 min | 3 tasks | 2 files |
 | Phase 09-mcp-integration-layer P02 | 12min | 3 tasks | 2 files |
 | Phase 09-mcp-integration-layer P04 | 5min | 3 tasks | 4 files |
+| Phase 10-core-command-integration P01 | 6min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,7 @@ progress:
 - [Phase 09-mcp-integration-layer]: Three-tier error classification with Tier 1/2 triggering fallback and Tier 3 not triggering fallback — Enables intelligent fallback decisions by distinguishing infrastructure failures from command failures
 - [Phase 09-mcp-integration-layer]: Implemented three-tier fallback: Tier 1/2 errors trigger native fallback, Tier 3 does not
 - [Phase 09-mcp-integration-layer]: Command allowlist prevents RTK failures from unsupported flags - unsupported commands bypass RTK entirely
+- [Phase 10-core-command-integration]: Used ~4 chars/token heuristic for token estimation (common approximation) — Standard approximation for token counting without requiring heavy dependencies. Accurate enough for relative savings measurement.
 
 ### Technical Debt
 - Multi-arch testing on Apple Silicon (aarch64) needed before production
@@ -98,8 +100,8 @@ None currently.
 
 ### Todos (Active)
 - [x] Plan Phase 8: Infrastructure & Docker Setup (Complete)
-- [x] Plan Phase 9: MCP Integration Layer (3 of 3 plans complete)
-- [ ] Plan Phase 10: Core Command Integration
+- [x] Plan Phase 9: MCP Integration Layer (4 of 4 plans complete)
+- [~] Plan Phase 10: Core Command Integration (1 of 3 plans complete)
 - [ ] Plan Phase 11: Test Optimization & Advanced Features
 
 ### Todos (Backlog)
@@ -111,20 +113,24 @@ None currently.
 
 ## Session Continuity
 
-**Last Action:** Completed Phase 09-03: Error classification system with TDD
+**Last Action:** Completed Phase 10-01: Token tracking infrastructure with 84 passing tests
 
-**Next Action:** Execute Phase 09-04: Fallback integration
+**Next Action:** Execute Phase 10-02: Spawn wrapper and bash tool integration
 
-**Context Hash:** `v1.1-rtk-p9-p03-complete`
+**Context Hash:** `v1.1-rtk-p10-p01-complete`
 
 **Recent Context:**
 - Phase 8: Complete (RTK infrastructure installed)
 - Phase 9: Complete (MCP integration layer with 92 passing tests)
-- Phase 10: Context captured — Core command integration
+- Phase 10: Token tracking infrastructure complete
+  - TokenTracker: In-memory savings tracking with periodic reporting
+  - TokenLogger: Persistent JSONL logging with daily rotation
+  - CommandParser: native: prefix detection for bypass
+  - 84 tests passing
 - Routing: Wrap at spawn level, all RTK-supported commands, 'native:' bypass prefix
 - Exit codes: Pass through exactly, transparent to callers
 - Token reduction: Log comparison with periodic reporting
-- Context file: `.planning/phases/10-core-command-integration/10-CONTEXT.md`
+- Context file: `.planning/phases/10-core-command-integration/10-01-SUMMARY.md`
 
 ---
 
@@ -135,7 +141,7 @@ None currently.
 |-------|------|--------|--------------|
 | 8 | Infrastructure & Docker Setup | ✅ Complete | 5 |
 | 9 | MCP Integration Layer | ✅ Complete | 8 |
-| 10 | Core Command Integration | ⏸️ Blocked | 6 |
+| 10 | Core Command Integration | 🔄 In Progress (1/3) | 6 |
 | 11 | Test Optimization & Advanced Features | ⏸️ Blocked | 10 |
 
 ### Commands
@@ -145,4 +151,4 @@ None currently.
 
 ---
 
-*State updated: 2026-03-01 — Completed Phase 09-03 (TDD error classification)*
+*State updated: 2026-03-01 — Completed Phase 10-01 (Token tracking infrastructure)*
