@@ -119,11 +119,12 @@ None currently.
 
 **Recent Context:**
 - Phase 8: Complete (RTK infrastructure installed)
-- Phase 9 Plan 3: Complete (ErrorClassifier with three-tier classification)
-- ErrorClassifier distinguishes Tier 1/2 (fallback) from Tier 3 (no fallback)
-- 22 unit tests covering all tiers and edge cases
-- Successor plan (09-04) can import ErrorClassifier for fallback decisions
-- Phase 9 is complete (3 of 3 plans finished)
+- Phase 9: Complete (MCP integration layer with 92 passing tests)
+- Phase 10: Context captured — Core command integration
+- Routing: Wrap at spawn level, all RTK-supported commands, 'native:' bypass prefix
+- Exit codes: Pass through exactly, transparent to callers
+- Token reduction: Log comparison with periodic reporting
+- Context file: `.planning/phases/10-core-command-integration/10-CONTEXT.md`
 
 ---
 
