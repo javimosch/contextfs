@@ -49,10 +49,10 @@ Requirements for RTK integration milestone. Each maps to roadmap phases.
 
 ### Error Handling
 
-- [ ] **ERROR-01**: Graceful fallback to native execution on RTK errors
-- [ ] **ERROR-02**: Tee feature saves full output on command failures
+- [x] **ERROR-01**: Graceful fallback to native execution on RTK errors
+- [x] **ERROR-02**: Tee feature saves full output on command failures
 - [x] **ERROR-03**: Error classification (RTK vs command vs native failure)
-- [ ] **ERROR-04**: Command allowlist prevents unsupported flag failures
+- [x] **ERROR-04**: Command allowlist prevents unsupported flag failures
 
 ## v2 Requirements (Deferred)
 
@@ -101,10 +101,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CONFIG-02 | v1.2 | Deferred |
 | CONFIG-03 | Phase 9 | Pending |
 | CONFIG-04 | Phase 9 | Complete |
-| ERROR-01 | Phase 9 | Pending |
-| ERROR-02 | Phase 9 | Pending |
+| ERROR-01 | Phase 9 | Complete |
+| ERROR-02 | Phase 9 | Complete |
 | ERROR-03 | Phase 9 | Complete |
-| ERROR-04 | Phase 9 | Pending |
+| ERROR-04 | Phase 9 | Complete |
 | CORE-01 | Phase 10 | Pending |
 | CORE-02 | Phase 10 | Pending |
 | CORE-03 | Phase 10 | Pending |

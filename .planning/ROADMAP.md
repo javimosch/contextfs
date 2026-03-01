@@ -15,8 +15,7 @@
 
 | Phase | Focus | Value Delivery |
 |-------|-------|----------------|
-| 8 | 1/2 | Complete    | 2026-03-01 | 9 | MCP Integration Layer | Configurable proxy with graceful fallback |
-| 10 | Core Command Integration | 60-80% token savings on common commands |
+| 8 | 1/2 | Complete    | 2026-03-01 | 9 | 4/4 | Complete   | 2026-03-01 | 10 | Core Command Integration | 60-80% token savings on common commands |
 | 11 | Test Optimization & Advanced Features | 85-90% token savings on test output |
 
 ## Phases
@@ -36,7 +35,7 @@
 ### v1.1 RTK Integration (Phases 8-11)
 
 - [x] **Phase 8: Infrastructure & Docker Setup** - RTK binary installed with multi-arch support, shell wrappers, and health checks (completed 2026-03-01)
-- [ ] **Phase 9: MCP Integration Layer** - Configuration toggles, availability detection, and robust error handling with graceful fallback
+- [x] **Phase 9: MCP Integration Layer** - Configuration toggles, availability detection, and robust error handling with graceful fallback (completed 2026-03-01)
 - [ ] **Phase 10: Core Command Integration** - ls, grep, git, and docker commands proxied through RTK with exit code preservation
 - [ ] **Phase 11: Test Optimization & Advanced Features** - Pattern detection for tests, read/smart tools, and ultra-compact mode
 
@@ -86,7 +85,7 @@ Wave 2: 08-02 (Scripts and compose - depends on 08-01)
 5. Error messages clearly distinguish between RTK errors, command errors, and native failures
 6. Commands with unsupported flags bypass RTK and execute natively
 
-**Plans:** 3/4 plans complete
+**Plans:** 4/4 plans complete
 
 **Plan List:**
 - [x] `09-01-PLAN.md` — Container initialization script with RTK detection and logging (CONFIG-03) ✓ Complete

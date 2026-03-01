@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: RTK Integration Summary
 status: unknown
-last_updated: "2026-03-01T18:23:23Z"
+last_updated: "2026-03-01T18:27:29.691Z"
 progress:
   total_phases: 2
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 6
 ---
 
 # Project State: ContextFS v1.1 RTK Integration
@@ -67,6 +67,7 @@ progress:
 | Phase 08-infrastructure-docker-setup P02 | 2min | 4 tasks | 4 files |
 | Phase 09-mcp-integration-layer P01 | 1 min | 3 tasks | 2 files |
 | Phase 09-mcp-integration-layer P02 | 12min | 3 tasks | 2 files |
+| Phase 09-mcp-integration-layer P04 | 5min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -85,6 +86,8 @@ progress:
 - [Phase 09-mcp-integration-layer]: Invalid CONTEXTFS_RTK_ENABLED values fall back to auto-detect with warning
 - [Phase 09-mcp-integration-layer]: Used Node.js built-in test runner instead of Jest for zero-dependency testing — Avoids additional dependencies while providing comprehensive test coverage
 - [Phase 09-mcp-integration-layer]: Three-tier error classification with Tier 1/2 triggering fallback and Tier 3 not triggering fallback — Enables intelligent fallback decisions by distinguishing infrastructure failures from command failures
+- [Phase 09-mcp-integration-layer]: Implemented three-tier fallback: Tier 1/2 errors trigger native fallback, Tier 3 does not
+- [Phase 09-mcp-integration-layer]: Command allowlist prevents RTK failures from unsupported flags - unsupported commands bypass RTK entirely
 
 ### Technical Debt
 - Multi-arch testing on Apple Silicon (aarch64) needed before production
