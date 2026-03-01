@@ -32,7 +32,8 @@ const ALLOWLIST = {
   'wc': ['-l', '-w', '-c'],
   'find': ['-name', '-type', '-exec', '-print', '-maxdepth'],
   'sort': ['-n', '-r', '-k', '-t'],
-  'uniq': ['-c', '-d', '-u']
+  'uniq': ['-c', '-d', '-u'],
+  'docker': ['ps', 'images']
 };
 
 /**
