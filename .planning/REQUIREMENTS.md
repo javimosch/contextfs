@@ -28,7 +28,7 @@ Requirements for RTK integration milestone. Each maps to roadmap phases.
 - [ ] **CORE-02**: `grep` / `rg` commands proxied through RTK with grouped results
 - [ ] **CORE-03**: `git status` / `git diff` / `git log` proxied through RTK
 - [ ] **CORE-04**: `docker ps` / `docker images` proxied through RTK
-- [ ] **CORE-05**: Exit codes preserved for all proxied commands
+- [x] **CORE-05**: Exit codes preserved for all proxied commands
 - [x] **CORE-06**: 60-80% token reduction verified for core commands
 
 ### Test Optimization
@@ -109,7 +109,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CORE-02 | Phase 10 | Pending |
 | CORE-03 | Phase 10 | Pending |
 | CORE-04 | Phase 10 | Pending |
-| CORE-05 | Phase 10 | Pending |
+| CORE-05 | Phase 10 | Complete |
 | CORE-06 | Phase 10 | Complete |
 | TEST-01 | Phase 11 | Pending |
 | TEST-02 | Phase 11 | Pending |
