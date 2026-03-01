@@ -17,8 +17,8 @@
 |-------|-------|-------|--------|-----------|
 | 8 | Infrastructure & Docker Setup | 2/2 | Complete | 2026-03-01 |
 | 9 | MCP Integration Layer | 4/4 | Complete | 2026-03-01 |
-| 10 | Core Command Integration | 2/3 | In Progress | - |
-| 11 | Test Optimization & Advanced Features | 0/2 | Blocked | - |
+| 10 | Core Command Integration | 3/3 | Complete | 2026-03-01 |
+| 11 | Test Optimization & Advanced Features | 0/2 | Ready | - |
 
 ## Phases
 
@@ -38,7 +38,7 @@
 
 - [x] **Phase 8: Infrastructure & Docker Setup** - RTK binary installed with multi-arch support, shell wrappers, and health checks (completed 2026-03-01)
 - [x] **Phase 9: MCP Integration Layer** - Configuration toggles, availability detection, and robust error handling with graceful fallback (completed 2026-03-01)
-- [ ] **Phase 10: Core Command Integration** - ls, grep, git, and docker commands proxied through RTK with exit code preservation
+- [x] **Phase 10: Core Command Integration** - ls, grep, git, and docker commands proxied through RTK with token reduction verification (completed 2026-03-01)
 - [ ] **Phase 11: Test Optimization & Advanced Features** - Pattern detection for tests, read/smart tools, and ultra-compact mode
 
 ## Phase Details
@@ -118,19 +118,19 @@ Wave 2: 09-03, 09-04 (error handling and executor - depends on config)
 5. Failed commands (non-zero exit codes) are correctly identified as failures
 6. Core commands achieve measured 60-80% token reduction versus native output
 
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 **Wave Structure:**
 ```
 Wave 1: 10-01 (Token tracking infrastructure - no dependencies) ✓ Complete
 Wave 2: 10-02 (Spawn wrapper and integration - depends on 10-01) ✓ Complete
-Wave 3: 10-03 (Verification and bash adapter - depends on 10-02)
+Wave 3: 10-03 (Verification and bash adapter - depends on 10-02) ✓ Complete
 ```
 
 **Plan List:**
 - [x] `10-01-PLAN.md` — Token tracking, logging, and command parser infrastructure (CORE-06) ✓ Complete
 - [x] `10-02-PLAN.md` — Spawn wrapper and bash tool integration (CORE-01, CORE-02, CORE-03, CORE-04, CORE-05) ✓ Complete
-- [ ] `10-03-PLAN.md` — Token reduction verification and bash adapter (CORE-05, CORE-06)
+- [x] `10-03-PLAN.md` — Token reduction verification and bash adapter (CORE-05, CORE-06) ✓ Complete
 
 ---
 
@@ -173,8 +173,8 @@ Phase 11 (Test + Advanced)
 | 1-7   | v1.0      | —              | ✓ Complete | 2026-02-27 |
 | 8     | v1.1      | 2/2            | ✓ Complete | 2026-03-01 |
 | 9     | v1.1      | 4/4            | ✓ Complete | 2026-03-01 |
-| 10    | v1.1      | 2/3            | 🔄 In Progress | - |
-| 11    | v1.1      | 0/2            | ⏸️ Blocked | - |
+| 10    | v1.1      | 3/3            | ✓ Complete | 2026-03-01 |
+| 11    | v1.1      | 0/2            | ⏸️ Ready | - |
 
 ## Requirements Coverage
 
@@ -213,7 +213,7 @@ Phase 11 (Test + Advanced)
 | CORE-03 | Phase 10 | `git` commands proxied through RTK | ✅ Complete
 | CORE-04 | Phase 10 | `docker` commands proxied through RTK | ✅ Complete
 | CORE-05 | Phase 10 | Exit codes preserved | ✅ Complete
-| CORE-06 | Phase 10 | 60-80% token reduction verified |
+| CORE-06 | Phase 10 | 60-80% token reduction verified | ✅ Complete
 | TEST-01 | Phase 11 | Pattern detection for test commands |
 | TEST-02 | Phase 11 | `rtk test` wrapper |
 | TEST-03 | Phase 11 | `npm test` proxied through RTK |
@@ -237,4 +237,4 @@ See `.planning/research/SUMMARY.md` for full details.
 
 ---
 
-*Roadmap updated: 2026-03-01 — Phase 10-02 complete (Spawn wrapper with 59 passing tests)*
+*Roadmap updated: 2026-03-01 — Phase 10-03 complete (Token reduction verification and bash-rtk-adapter with 71 new tests)*
