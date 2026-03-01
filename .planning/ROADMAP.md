@@ -75,7 +75,8 @@ Wave 2: 08-02 (Scripts and compose - depends on 08-01)
 
 **Depends on:** Phase 8
 
-**Requirements:** CONFIG-01, CONFIG-02, CONFIG-03, CONFIG-04, ERROR-01, ERROR-02, ERROR-03, ERROR-04
+**Requirements:** CONFIG-01, CONFIG-03, CONFIG-04, ERROR-01, ERROR-02, ERROR-03, ERROR-04  
+*Note: CONFIG-02 (per-workspace configuration) deferred to v1.2 per user decision*
 
 **Success Criteria** (what must be TRUE):
 1. Setting `CONTEXTFS_RTK_ENABLED=false` completely disables RTK proxying for all commands

@@ -18,7 +18,7 @@ Requirements for RTK integration milestone. Each maps to roadmap phases.
 ### Configuration
 
 - [ ] **CONFIG-01**: Environment variable `CONTEXTFS_RTK_ENABLED` for global toggle
-- [ ] **CONFIG-02**: Per-workspace RTK enable/disable configuration
+- ~~[ ] **CONFIG-02**: Per-workspace RTK enable/disable configuration~~ *Deferred to v1.2*
 - [ ] **CONFIG-03**: RTK binary availability detection at container startup
 - [ ] **CONFIG-04**: Graceful degradation when RTK is disabled or unavailable
 
@@ -56,6 +56,12 @@ Requirements for RTK integration milestone. Each maps to roadmap phases.
 
 ## v2 Requirements (Deferred)
 
+### Configuration Enhancements
+
+- **CONFIG-02**: Per-workspace RTK enable/disable configuration (deferred from v1.1)
+- **CONFIG-05**: Per-command RTK enable/disable configuration
+- **CONFIG-06**: Hot-reload of RTK configuration without container restart
+
 ### Analytics & Monitoring
 
 - **ANALYTICS-01**: Token savings tracking per workspace session
@@ -92,7 +98,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-04 | Phase 8 | Complete |
 | INFRA-05 | Phase 8 | Complete |
 | CONFIG-01 | Phase 9 | Pending |
-| CONFIG-02 | Phase 9 | Pending |
+| CONFIG-02 | v1.2 | Deferred |
 | CONFIG-03 | Phase 9 | Pending |
 | CONFIG-04 | Phase 9 | Pending |
 | ERROR-01 | Phase 9 | Pending |
