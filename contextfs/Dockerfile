@@ -78,12 +78,14 @@ RUN set -eux; \
 # Copy RTK helper scripts
 COPY scripts/rtk-shell-wrapper.sh /usr/local/bin/
 COPY scripts/healthcheck-rtk.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/rtk-shell-wrapper.sh /usr/local/bin/healthcheck-rtk.sh
+COPY scripts/init-rtk.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/rtk-shell-wrapper.sh /usr/local/bin/healthcheck-rtk.sh /usr/local/bin/init-rtk.sh
 
 # Health check for RTK
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD /usr/local/bin/healthcheck-rtk.sh
 
-# Inherit entrypoint and cmd from runtime-base
-ENTRYPOINT ["/sbin/tini", "--"]
+# Use init-rtk.sh as ENTRYPOINT to detect RTK before starting main process
+# init-rtk.sh will exec tini and then the main command
+ENTRYPOINT ["/usr/local/bin/init-rtk.sh", "/sbin/tini", "--"]
 CMD ["node", "/app/bin/contextfs.js", "client"]
