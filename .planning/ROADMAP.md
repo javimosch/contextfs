@@ -86,12 +86,12 @@ Wave 2: 08-02 (Scripts and compose - depends on 08-01)
 5. Error messages clearly distinguish between RTK errors, command errors, and native failures
 6. Commands with unsupported flags bypass RTK and execute natively
 
-**Plans:** 1/4 plans complete
+**Plans:** 3/4 plans complete
 
 **Plan List:**
 - [x] `09-01-PLAN.md` — Container initialization script with RTK detection and logging (CONFIG-03) ✓ Complete
-- [ ] `09-02-PLAN.md` — Configuration module with boolean parsing and auto-detect (CONFIG-01, CONFIG-04)
-- [ ] `09-03-PLAN.md` — Error classification system with three-tier logic (ERROR-03)
+- [x] `09-02-PLAN.md` — Configuration module with boolean parsing and auto-detect (CONFIG-01, CONFIG-04) ✓ Complete
+- [x] `09-03-PLAN.md` — Error classification system with three-tier logic (ERROR-03) ✓ Complete
 - [ ] `09-04-PLAN.md` — RTK executor with fallback, tee output, and allowlist (ERROR-01, ERROR-02, ERROR-04)
 
 **Wave Structure:**
@@ -159,7 +159,7 @@ Phase 11 (Test + Advanced)
 |-------|-----------|----------------|--------|-----------|
 | 1-7   | v1.0      | —              | ✓ Complete | 2026-02-27 |
 | 8     | v1.1      | 2/2            | ✓ Complete | 2026-03-01 |
-| 9     | v1.1      | 1/4            | 🔄 In Progress | 2026-03-01 |
+| 9     | v1.1      | 3/4            | 🔄 In Progress | 2026-03-01 |
 | 10    | v1.1      | 0/3            | ⏸️ Blocked | - |
 | 11    | v1.1      | 0/2            | ⏸️ Blocked | - |
 
@@ -193,7 +193,7 @@ Phase 11 (Test + Advanced)
 | CONFIG-04 | Phase 9 | Graceful degradation when disabled |
 | ERROR-01 | Phase 9 | Graceful fallback on RTK errors |
 | ERROR-02 | Phase 9 | Tee output saves full output on failures |
-| ERROR-03 | Phase 9 | Error classification system |
+| ERROR-03 | Phase 9 | Error classification system | ✅ Complete
 | ERROR-04 | Phase 9 | Command allowlist for flags |
 | CORE-01 | Phase 10 | `ls` proxied through RTK |
 | CORE-02 | Phase 10 | `grep`/`rg` proxied through RTK |
@@ -224,4 +224,4 @@ See `.planning/research/SUMMARY.md` for full details.
 
 ---
 
-*Roadmap updated: 2026-03-01 — Phase 09-01 complete*
+*Roadmap updated: 2026-03-01 — Phase 09-03 complete (TDD error classification)*

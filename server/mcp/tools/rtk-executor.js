@@ -1,0 +1,320 @@
+/**
+ * RTK Executor Module
+ * 
+ * Primary command execution using RTK with automatic fallback to native execution.
+ * Implements three-tier error classification to determine when fallback is appropriate.
+ * 
+ * @module RTKExecutor
+ */
+
+'use strict';
+
+const { spawn } = require('child_process');
+const fs = require('fs').promises;
+const path = require('path');
+const { RTKConfig } = require('../../config/rtk-config.js');
+const { ErrorClassifier } = require('./error-classifier.js');
+const { NativeExecutor } = require('./native-executor.js');
+
+/**
+ * Command allowlist for supported commands and flags
+ * Prevents execution of commands with unsupported flags that would fail in RTK
+ * @readonly
+ */
+const ALLOWLIST = {
+  'ls': ['-l', '-a', '-la', '-al', '-R', '--color', '-1', '-h', '-lah', '-ltr'],
+  'grep': ['-i', '-v', '-r', '-n', '-E', '-F', '--color', '-l', '-c', '-w'],
+  'rg': ['-i', '-v', '-n', '-l', '-c', '--color', '-w', '-t', '-g', '-A', '-B', '-C'],
+  'git': ['status', 'diff', 'log', 'show', 'branch', 'ls-files'],
+  'cat': [],
+  'head': ['-n'],
+  'tail': ['-n', '-f'],
+  'wc': ['-l', '-w', '-c'],
+  'find': ['-name', '-type', '-exec', '-print', '-maxdepth'],
+  'sort': ['-n', '-r', '-k', '-t'],
+  'uniq': ['-c', '-d', '-u']
+};
+
+/**
+ * Custom error class for RTK execution failures
+ */
+class RTKExecutionError extends Error {
+  /**
+   * Create an RTKExecutionError
+   * @param {string} type - Error classification type
+   * @param {string} message - Human-readable error message
+   * @param {Object} metadata - Additional error context
+   * @param {boolean} metadata.shouldFallback - Whether fallback is appropriate
+   * @param {number} metadata.exitCode - Exit code from execution
+   * @param {string} metadata.stderr - stderr output
+   */
+  constructor(type, message, metadata = {}) {
+    super(message);
+    this.name = 'RTKExecutionError';
+    this.type = type;
+    this.shouldFallback = metadata.shouldFallback || false;
+    this.exitCode = metadata.exitCode;
+    this.stderr = metadata.stderr;
+  }
+}
+
+/**
+ * RTK command executor with automatic fallback to native execution
+ */
+class RTKExecutor {
+  /**
+   * Create a new RTKExecutor instance
+   * @param {Object} config - Configuration options
+   * @param {Object} config.rtkConfig - RTKConfig instance (optional, loads default if not provided)
+   * @param {NativeExecutor} config.nativeExecutor - NativeExecutor instance (optional, creates default)
+   */
+  constructor(config = {}) {
+    this.config = config.rtkConfig || RTKConfig.getConfig();
+    this.nativeExecutor = config.nativeExecutor || new NativeExecutor();
+    this.errorClassifier = ErrorClassifier;
+  }
+
+  /**
+   * Execute a command (RTK with fallback to native)
+   * 
+   * @param {string} command - The command to execute
+   * @param {string[]} args - Command arguments
+   * @param {Object} options - Execution options
+   * @param {string} options.cwd - Working directory
+   * @param {Object} options.env - Environment variables
+   * @param {number} options.timeout - Timeout in milliseconds
+   * @returns {Promise<Object>} Execution result with stdout, stderr, exitCode, source
+   */
+  async execute(command, args = [], options = {}) {
+    // Check if RTK is disabled
+    if (!this.config.enabled) {
+      return this.nativeExecutor.execute(command, args, options);
+    }
+
+    // Check if command is in allowlist
+    if (!this.isSupportedCommand(command, args)) {
+      return this.nativeExecutor.execute(command, args, options);
+    }
+
+    // Try RTK first
+    try {
+      const result = await this.executeRTK(command, args, options);
+      return result;
+    } catch (error) {
+      // Check if this is an RTKExecutionError with fallback enabled
+      if (error instanceof RTKExecutionError && error.shouldFallback) {
+        console.warn(`[RTK-Executor] Falling back to native execution: ${error.message}`);
+        return this.nativeExecutor.execute(command, args, options);
+      }
+      
+      // Re-throw if no fallback or different error type
+      throw error;
+    }
+  }
+
+  /**
+   * Execute command via RTK
+   * @private
+   */
+  async executeRTK(command, args, options) {
+    const {
+      cwd = process.cwd(),
+      env = process.env,
+      timeout = this.config.timeout
+    } = options;
+
+    const rtkArgs = this.mapToRTKArgs(command, args);
+
+    return new Promise((resolve, reject) => {
+      const stdoutChunks = [];
+      const stderrChunks = [];
+      let spawnError = null;
+
+      const child = spawn(this.config.binaryPath, rtkArgs, {
+        cwd,
+        env,
+        shell: false,
+        stdio: ['ignore', 'pipe', 'pipe']
+      });
+
+      child.stdout.on('data', (chunk) => {
+        stdoutChunks.push(chunk);
+      });
+
+      child.stderr.on('data', (chunk) => {
+        stderrChunks.push(chunk);
+      });
+
+      // Set up timeout
+      let timeoutId = null;
+      if (timeout > 0) {
+        timeoutId = setTimeout(() => {
+          child.kill('SIGTERM');
+        }, timeout);
+      }
+
+      child.on('error', (error) => {
+        if (timeoutId) clearTimeout(timeoutId);
+        spawnError = error;
+      });
+
+      child.on('close', async (code, signal) => {
+        if (timeoutId) clearTimeout(timeoutId);
+
+        const stdout = Buffer.concat(stdoutChunks).toString('utf8');
+        const stderr = Buffer.concat(stderrChunks).toString('utf8');
+
+        // Handle spawn errors (Tier 1)
+        if (spawnError) {
+          const classification = this.errorClassifier.classify(spawnError, stderr);
+          
+          if (classification.fallback) {
+            reject(new RTKExecutionError(
+              classification.type,
+              classification.message,
+              { shouldFallback: true, exitCode: code, stderr }
+            ));
+          } else {
+            reject(spawnError);
+          }
+          return;
+        }
+
+        // Classify the result
+        const exitError = code !== 0 ? { code } : null;
+        const classification = this.errorClassifier.classify(exitError, stderr);
+
+        // Save tee output on error if enabled
+        if (code !== 0 && this.config.teeOnError) {
+          await this.saveTeeOutput(command, args, stdout, stderr, code);
+        }
+
+        // Handle non-zero exit
+        if (code !== 0) {
+          if (classification.fallback && classification.tier !== 3) {
+            // Tier 1 or 2 - fallback appropriate
+            reject(new RTKExecutionError(
+              classification.type,
+              classification.message,
+              { shouldFallback: true, exitCode: code, stderr }
+            ));
+          } else {
+            // Tier 3 - no fallback, return the error result
+            resolve({
+              stdout,
+              stderr,
+              exitCode: code,
+              source: 'rtk'
+            });
+          }
+          return;
+        }
+
+        // Success
+        resolve({
+          stdout,
+          stderr,
+          exitCode: 0,
+          source: 'rtk'
+        });
+      });
+    });
+  }
+
+  /**
+   * Map native command to RTK arguments
+   * @private
+   */
+  mapToRTKArgs(command, args) {
+    // Map common commands to RTK subcommands
+    const commandMappings = {
+      'ls': ['ls', ...args],
+      'grep': ['grep', ...args],
+      'rg': ['grep', ...args], // rg maps to grep in RTK
+      'git': ['git', ...args],
+      'cat': ['cat', ...args],
+      'head': ['head', ...args],
+      'tail': ['tail', ...args],
+      'wc': ['wc', ...args],
+      'find': ['find', ...args],
+      'sort': ['sort', ...args],
+      'uniq': ['uniq', ...args]
+    };
+
+    return commandMappings[command] || [command, ...args];
+  }
+
+  /**
+   * Check if a command with given args is supported
+   * @param {string} command - Command name
+   * @param {string[]} args - Command arguments
+   * @returns {boolean} True if command and all flags are supported
+   */
+  isSupportedCommand(command, args) {
+    // Check if command is in allowlist
+    const supportedFlags = ALLOWLIST[command];
+    if (!supportedFlags) {
+      return false;
+    }
+
+    // Check each argument
+    for (const arg of args) {
+      // Skip non-flag arguments (files, patterns, etc.)
+      if (!arg.startsWith('-')) {
+        continue;
+      }
+
+      // Check if flag is supported
+      if (!supportedFlags.includes(arg)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * Save command output to tee file for debugging
+   * @private
+   */
+  async saveTeeOutput(command, args, stdout, stderr, exitCode) {
+    try {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const teeDir = '/workspace/.rtk/tee';
+      const filename = `${timestamp}_${command}.log`;
+      const filepath = path.join(teeDir, filename);
+
+      // Ensure directory exists
+      await fs.mkdir(teeDir, { recursive: true });
+
+      // Write tee file
+      const content = [
+        `Command: ${command}`,
+        `Args: ${JSON.stringify(args)}`,
+        `Exit Code: ${exitCode}`,
+        `Timestamp: ${new Date().toISOString()}`,
+        '---',
+        'STDOUT:',
+        stdout,
+        '---',
+        'STDERR:',
+        stderr
+      ].join('\n');
+
+      await fs.writeFile(filepath, content, 'utf8');
+    } catch (error) {
+      // Tee failure should not break execution
+      console.warn(`[RTK-Executor] Failed to save tee output: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get the allowlist of supported commands
+   * @returns {Object} Allowlist object
+   */
+  static getAllowlist() {
+    return { ...ALLOWLIST };
+  }
+}
+
+module.exports = { RTKExecutor, RTKExecutionError };
