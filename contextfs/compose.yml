@@ -43,16 +43,27 @@ services:
     volumes:
       # Mount workspace directory for client operations
       - ./workspace:/workspace
+      # RTK workspace-scoped database
+      - ./workspace/.rtk:/workspace/.rtk
       # Optionally mount contextfs home for config persistence
       # - ~/.contextfs:/.contextfs
     environment:
       - CONTEXTFS_SERVER_URL=ws://server:3010
       - CONTEXTFS_API_KEY=local-dev-key
       - CONTEXTFS_WS_CLIENT_ID=compose-client-1
+      - CONTEXTFS_RTK_ENABLED=true
       - VERBOSE=1
+      # RTK workspace configuration
+      - RTK_WORKSPACE=/workspace
     networks:
       - contextfs
     command: node /app/bin/contextfs.js client --url ws://server:3010 --ws-client-id compose-client-1 --api-key local-dev-key --verbose
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/healthcheck-rtk.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
 
 networks:
   contextfs:
