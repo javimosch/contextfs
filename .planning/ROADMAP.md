@@ -15,7 +15,7 @@
 
 | Phase | Focus | Value Delivery |
 |-------|-------|----------------|
-| 8 | 1/2 | In Progress|  | 9 | MCP Integration Layer | Configurable proxy with graceful fallback |
+| 8 | 1/2 | Complete    | 2026-03-01 | 9 | MCP Integration Layer | Configurable proxy with graceful fallback |
 | 10 | Core Command Integration | 60-80% token savings on common commands |
 | 11 | Test Optimization & Advanced Features | 85-90% token savings on test output |
 
@@ -35,7 +35,7 @@
 
 ### v1.1 RTK Integration (Phases 8-11)
 
-- [ ] **Phase 8: Infrastructure & Docker Setup** - RTK binary installed with multi-arch support, shell wrappers, and health checks
+- [x] **Phase 8: Infrastructure & Docker Setup** - RTK binary installed with multi-arch support, shell wrappers, and health checks (completed 2026-03-01)
 - [ ] **Phase 9: MCP Integration Layer** - Configuration toggles, availability detection, and robust error handling with graceful fallback
 - [ ] **Phase 10: Core Command Integration** - ls, grep, git, and docker commands proxied through RTK with exit code preservation
 - [ ] **Phase 11: Test Optimization & Advanced Features** - Pattern detection for tests, read/smart tools, and ultra-compact mode
@@ -56,7 +56,7 @@
 4. Health check script passes for RTK installation and basic functionality
 5. Workspace-scoped RTK database directory exists at `/workspace/.rtk/`
 
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 **Plan List:**
 - [ ] `08-01-PLAN.md` — RTK binary installation with multi-arch support (INFRA-01, INFRA-02)
