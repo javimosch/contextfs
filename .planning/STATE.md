@@ -35,21 +35,21 @@ progress:
 
 | Field | Value |
 |-------|-------|
-| **Phase** | 10 |
-| **Phase Name** | Core Command Integration |
-| **Status** | ✅ Complete |
-| **Plans Total** | 4 (planned) |
-| **Plans Complete** | 4 |
+| **Phase** | 11 |
+| **Phase Name** | Test Optimization & Advanced Features |
+| **Status** | 🔄 In Progress |
+| **Plans Total** | 2 |
+| **Plans Complete** | 0 |
 
 **Progress Bar:**
 ```
-[████████████████████] 100% (Phase 10, Plan 4 of 4 complete)
+[████████████████████] 100% (Phase 10 complete)
 ```
 
 **Completion:**
 - Phases Complete: 3/4
 - Requirements Complete: 7/29 (INFRA-01, INFRA-02, CONFIG-03, ERROR-03, CORE-05, CORE-06)
-- Overall: 55%
+- Overall: 60%
 
 ---
 
@@ -101,6 +101,10 @@ progress:
 - [Phase 10-core-command-integration P03]: Skip tests gracefully when RTK not available in environment — Allows test suite to run anywhere while providing coverage when RTK present
 - [Phase 10-core-command-integration P03]: Route simple commands through RTK, complex commands (pipes/redirects) through shell — Maximum token savings while preserving full shell functionality
 - [Phase 10-core-command-integration P03]: Support native: comment prefix for explicit native execution bypass — Provides escape hatch for edge cases
+- [Phase 11-test-optimization-advanced-features]: Test failure verbosity includes full stack trace but limited to first 5 failures (TEST-01, TEST-05)
+- [Phase 11-test-optimization-advanced-features]: 'Smart' tool provides signature/purpose summary with line count/complexity (ADV-02)
+- [Phase 11-test-optimization-advanced-features]: 'Read' tool filters large files (>500 lines) showing first/last 100 with line numbers (ADV-01)
+- [Phase 11-test-optimization-advanced-features]: Ultra-compact mode (-u) aggressively strips whitespace/metadata, supported globally via env (ADV-04)
 
 ### Technical Debt
 - Multi-arch testing on Apple Silicon (aarch64) needed before production
@@ -124,28 +128,22 @@ None currently.
 
 ## Session Continuity
 
-**Last Action:** Completed Phase 10-04: Docker RTK integration - docker ps and docker images now route through RTK
+**Last Action:** Phase 11 context gathered: decisions on test verbosity, smart tool depth, and ultra-compact mode captured.
 
-**Next Action:** Execute Phase 11: Test Optimization & Advanced Features
+**Next Action:** Execute Phase 11 Plan 01 (/gsd-execute-phase 11)
 
-**Context Hash:** `v1.1-rtk-p10-complete`
+**Context Hash:** `v1.1-rtk-p11-context-ready`
 
 **Recent Context:**
-- Phase 8: Complete (RTK infrastructure installed)
-- Phase 9: Complete (MCP integration layer with 92 passing tests)
-- Phase 10: Complete (Core command integration with verification)
-  - SpawnWrapper: Transparent spawn interception with RTK routing
-  - client/spawn.js: RTK-aware runCommand and runCommandStreaming
-  - bash-rtk-adapter: Script execution with mixed RTK/shell routing
-  - Token reduction: 60-80% verified (test/token-reduction.test.js)
-  - Exit codes: 100% match verified (test/exit-code-preservation.test.js)
-  - 163 total tests passing (71 new in Phase 10-03)
-- Core commands (ls, grep, git, docker) automatically route through RTK
-- Fallback to native execution on RTK errors
-  - Phase 10-04: Complete (Docker RTK integration)
-    - Docker commands (ps, images) route through RTK
-    - CORE-04 unblocked, CORE-06 ready for verification
-  - Context file: `.planning/phases/10-core-command-integration/10-04-SUMMARY.md`
+- Phase 11 context gathered:
+  - Test optimization: show first 5 failures + full stack traces, summary at bottom, timeout detection.
+  - Smart tool: signature + purpose summary, line count + complexity, full content for <10 lines.
+  - Read tool: first/last 100 lines + summary, filter flags support, line numbers preserved.
+  - Ultra-compact: aggressive stripping, git log "hash message" format, global env support.
+- Phase 10: Complete (Core command integration verified)
+- Phase 9: Complete (Integration layer & error classifier)
+- Phase 8: Complete (RTK binary & shell wrapper)
+
 
 ---
 

@@ -18,7 +18,7 @@
 | 8 | Infrastructure & Docker Setup | 2/2 | Complete | 2026-03-01 |
 | 9 | MCP Integration Layer | 4/4 | Complete | 2026-03-01 |
 | 10 | 4/4 | Complete    | 2026-03-01 | 2026-03-01 |
-| 11 | Test Optimization & Advanced Features | 0/2 | Ready | - |
+| 11 | Test Optimization & Advanced Features | 2/2 | Ready | - |
 
 ## Phases
 
@@ -150,7 +150,17 @@ Wave 3: 10-03 (Verification and bash adapter - depends on 10-02) ✓ Complete
 6. Ultra-compact mode (`-u` flag) produces maximum compression when requested
 7. Supported command flags pass through to RTK without errors
 
-**Plans:** TBD
+**Plans:** 2/2 plans complete
+
+**Plan List:**
+- [ ] `11-01-PLAN.md` — RTK proxying for test commands with failure filtering (TEST-01 to TEST-05)
+- [ ] `11-02-PLAN.md` — Smart/read tools and ultra-compact mode (ADV-01 to ADV-04)
+
+**Wave Structure:**
+```
+Wave 1: 11-01 (Test optimization - infrastructure)
+Wave 2: 11-02 (Advanced tools - depends on 11-01)
+```
 
 ---
 
