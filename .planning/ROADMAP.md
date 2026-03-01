@@ -13,9 +13,12 @@
 **Phases:** 8-11
 **Depth:** Medium (Standard)
 
-| Phase | Focus | Value Delivery |
-|-------|-------|----------------|
-| 8 | 1/2 | Complete    | 2026-03-01 | 9 | 4/4 | Complete    | 2026-03-01 | 10 | 1/3 | In Progress|  | 11 | Test Optimization & Advanced Features | 85-90% token savings on test output |
+| Phase | Focus | Plans | Status | Completed |
+|-------|-------|-------|--------|-----------|
+| 8 | Infrastructure & Docker Setup | 2/2 | Complete | 2026-03-01 |
+| 9 | MCP Integration Layer | 4/4 | Complete | 2026-03-01 |
+| 10 | Core Command Integration | 2/3 | In Progress | - |
+| 11 | Test Optimization & Advanced Features | 0/2 | Blocked | - |
 
 ## Phases
 
@@ -115,18 +118,18 @@ Wave 2: 09-03, 09-04 (error handling and executor - depends on config)
 5. Failed commands (non-zero exit codes) are correctly identified as failures
 6. Core commands achieve measured 60-80% token reduction versus native output
 
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 **Wave Structure:**
 ```
-Wave 1: 10-01 (Token tracking infrastructure - no dependencies)
-Wave 2: 10-02 (Spawn wrapper and integration - depends on 10-01)
+Wave 1: 10-01 (Token tracking infrastructure - no dependencies) ✓ Complete
+Wave 2: 10-02 (Spawn wrapper and integration - depends on 10-01) ✓ Complete
 Wave 3: 10-03 (Verification and bash adapter - depends on 10-02)
 ```
 
 **Plan List:**
-- [ ] `10-01-PLAN.md` — Token tracking, logging, and command parser infrastructure (CORE-06)
-- [ ] `10-02-PLAN.md` — Spawn wrapper and bash tool integration (CORE-01, CORE-02, CORE-03, CORE-04, CORE-05)
+- [x] `10-01-PLAN.md` — Token tracking, logging, and command parser infrastructure (CORE-06) ✓ Complete
+- [x] `10-02-PLAN.md` — Spawn wrapper and bash tool integration (CORE-01, CORE-02, CORE-03, CORE-04, CORE-05) ✓ Complete
 - [ ] `10-03-PLAN.md` — Token reduction verification and bash adapter (CORE-05, CORE-06)
 
 ---
@@ -170,7 +173,7 @@ Phase 11 (Test + Advanced)
 | 1-7   | v1.0      | —              | ✓ Complete | 2026-02-27 |
 | 8     | v1.1      | 2/2            | ✓ Complete | 2026-03-01 |
 | 9     | v1.1      | 4/4            | ✓ Complete | 2026-03-01 |
-| 10    | v1.1      | 0/3            | 🔄 Ready | - |
+| 10    | v1.1      | 2/3            | 🔄 In Progress | - |
 | 11    | v1.1      | 0/2            | ⏸️ Blocked | - |
 
 ## Requirements Coverage
@@ -205,11 +208,11 @@ Phase 11 (Test + Advanced)
 | ERROR-02 | Phase 9 | Tee output saves full output on failures |
 | ERROR-03 | Phase 9 | Error classification system | ✅ Complete
 | ERROR-04 | Phase 9 | Command allowlist for flags |
-| CORE-01 | Phase 10 | `ls` proxied through RTK |
-| CORE-02 | Phase 10 | `grep`/`rg` proxied through RTK |
-| CORE-03 | Phase 10 | `git` commands proxied through RTK |
-| CORE-04 | Phase 10 | `docker` commands proxied through RTK |
-| CORE-05 | Phase 10 | Exit codes preserved |
+| CORE-01 | Phase 10 | `ls` proxied through RTK | ✅ Complete
+| CORE-02 | Phase 10 | `grep`/`rg` proxied through RTK | ✅ Complete
+| CORE-03 | Phase 10 | `git` commands proxied through RTK | ✅ Complete
+| CORE-04 | Phase 10 | `docker` commands proxied through RTK | ✅ Complete
+| CORE-05 | Phase 10 | Exit codes preserved | ✅ Complete
 | CORE-06 | Phase 10 | 60-80% token reduction verified |
 | TEST-01 | Phase 11 | Pattern detection for test commands |
 | TEST-02 | Phase 11 | `rtk test` wrapper |
@@ -234,4 +237,4 @@ See `.planning/research/SUMMARY.md` for full details.
 
 ---
 
-*Roadmap updated: 2026-03-01 — Phase 09-03 complete (TDD error classification)*
+*Roadmap updated: 2026-03-01 — Phase 10-02 complete (Spawn wrapper with 59 passing tests)*

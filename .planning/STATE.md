@@ -39,11 +39,11 @@ progress:
 | **Phase Name** | Core Command Integration |
 | **Status** | In Progress |
 | **Plans Total** | 3 (planned) |
-| **Plans Complete** | 1 |
+| **Plans Complete** | 2 |
 
 **Progress Bar:**
 ```
-[████████░░░░░░░░░░░░] 33% (Phase 10, Plan 1 of 3 complete)
+[████████████████░░░░] 67% (Phase 10, Plan 2 of 3 complete)
 ```
 
 **Completion:**
@@ -69,6 +69,7 @@ progress:
 | Phase 09-mcp-integration-layer P02 | 12min | 3 tasks | 2 files |
 | Phase 09-mcp-integration-layer P04 | 5min | 3 tasks | 4 files |
 | Phase 10-core-command-integration P01 | 6min | 3 tasks | 6 files |
+| Phase 10-core-command-integration P02 | 18min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,10 @@ progress:
 - [Phase 09-mcp-integration-layer]: Implemented three-tier fallback: Tier 1/2 errors trigger native fallback, Tier 3 does not
 - [Phase 09-mcp-integration-layer]: Command allowlist prevents RTK failures from unsupported flags - unsupported commands bypass RTK entirely
 - [Phase 10-core-command-integration]: Used ~4 chars/token heuristic for token estimation (common approximation) — Standard approximation for token counting without requiring heavy dependencies. Accurate enough for relative savings measurement.
+- [Phase 10-core-command-integration P02]: Strip native: prefix in client/spawn.js before execution to ensure commands work even when RTK is unavailable — Ensures bypass prefix works consistently in all environments
+- [Phase 10-core-command-integration P02]: Use lazy initialization for RTK components to avoid issues in non-container environments — Prevents initialization errors when RTK binaries not present
+- [Phase 10-core-command-integration P02]: Return exit code 127 for ENOENT (command not found) and 126 for EACCES/EPERM (permission denied) — Follows POSIX conventions for shell compatibility
+- [Phase 10-core-command-integration P02]: Shell commands (bash/sh with -c flag) bypass RTK to maintain compatibility — Avoids complex shell parsing and maintains expected behavior
 
 ### Technical Debt
 - Multi-arch testing on Apple Silicon (aarch64) needed before production
@@ -101,7 +106,7 @@ None currently.
 ### Todos (Active)
 - [x] Plan Phase 8: Infrastructure & Docker Setup (Complete)
 - [x] Plan Phase 9: MCP Integration Layer (4 of 4 plans complete)
-- [~] Plan Phase 10: Core Command Integration (1 of 3 plans complete)
+- [~] Plan Phase 10: Core Command Integration (2 of 3 plans complete)
 - [ ] Plan Phase 11: Test Optimization & Advanced Features
 
 ### Todos (Backlog)
@@ -113,24 +118,24 @@ None currently.
 
 ## Session Continuity
 
-**Last Action:** Completed Phase 10-01: Token tracking infrastructure with 84 passing tests
+**Last Action:** Completed Phase 10-02: Spawn wrapper with 59 passing tests
 
-**Next Action:** Execute Phase 10-02: Spawn wrapper and bash tool integration
+**Next Action:** Execute Phase 10-03: Advanced commands and shell integration
 
-**Context Hash:** `v1.1-rtk-p10-p01-complete`
+**Context Hash:** `v1.1-rtk-p10-p02-complete`
 
 **Recent Context:**
 - Phase 8: Complete (RTK infrastructure installed)
 - Phase 9: Complete (MCP integration layer with 92 passing tests)
-- Phase 10: Token tracking infrastructure complete
-  - TokenTracker: In-memory savings tracking with periodic reporting
-  - TokenLogger: Persistent JSONL logging with daily rotation
-  - CommandParser: native: prefix detection for bypass
-  - 84 tests passing
-- Routing: Wrap at spawn level, all RTK-supported commands, 'native:' bypass prefix
-- Exit codes: Pass through exactly, transparent to callers
-- Token reduction: Log comparison with periodic reporting
-- Context file: `.planning/phases/10-core-command-integration/10-01-SUMMARY.md`
+- Phase 10: Spawn wrapper integration complete
+  - SpawnWrapper: Transparent spawn interception with RTK routing
+  - client/spawn.js: RTK-aware runCommand and runCommandStreaming
+  - native: prefix bypass for native execution
+  - Exit codes preserved exactly (0, 1, 126, 127)
+  - 59 tests passing (34 unit + 25 integration)
+- Core commands (ls, grep, git, docker) automatically route through RTK
+- Fallback to native execution on RTK errors
+- Context file: `.planning/phases/10-core-command-integration/10-02-SUMMARY.md`
 
 ---
 
