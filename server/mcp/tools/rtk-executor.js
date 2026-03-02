@@ -33,7 +33,13 @@ const ALLOWLIST = {
   'find': ['-name', '-type', '-exec', '-print', '-maxdepth'],
   'sort': ['-n', '-r', '-k', '-t'],
   'uniq': ['-c', '-d', '-u'],
-  'docker': ['ps', 'images']
+  'docker': ['ps', 'images'],
+  'npm': ['test', '--test', '-t', '--prefix'],
+  'cargo': ['test'],
+  'pytest': ['-v', '-s'],
+  'vitest': ['run'],
+  'jest': ['--ci'],
+  'node': ['--require', '-r']
 };
 
 /**
@@ -201,8 +207,13 @@ class RTKExecutor {
             ));
           } else {
             // Tier 3 - no fallback, return the error result
+            let processedStdout = stdout;
+            if (this.isTestCommand(command, args)) {
+              processedStdout = this.processTestOutput(stdout, stderr, code);
+            }
+
             resolve({
-              stdout,
+              stdout: processedStdout,
               stderr,
               exitCode: code,
               source: 'rtk'
@@ -212,8 +223,13 @@ class RTKExecutor {
         }
 
         // Success
+        let processedStdout = stdout;
+        if (this.isTestCommand(command, args)) {
+          processedStdout = this.processTestOutput(stdout, stderr, code);
+        }
+
         resolve({
-          stdout,
+          stdout: processedStdout,
           stderr,
           exitCode: 0,
           source: 'rtk'
@@ -240,7 +256,13 @@ class RTKExecutor {
       'find': ['find', ...args],
       'sort': ['sort', ...args],
       'uniq': ['uniq', ...args],
-      'docker': ['docker', ...args]
+      'docker': ['docker', ...args],
+      'npm': ['npm', ...args],
+      'cargo': ['cargo', ...args],
+      'pytest': ['pytest', ...args],
+      'vitest': ['vitest', ...args],
+      'jest': ['jest', ...args],
+      'node': ['node', ...args]
     };
 
     return commandMappings[command] || [command, ...args];
@@ -257,6 +279,15 @@ class RTKExecutor {
     const supportedFlags = ALLOWLIST[command];
     if (!supportedFlags) {
       return false;
+    }
+
+    // Special handling for test commands
+    if (command === 'npm' || command === 'cargo') {
+      if (!args.includes('test')) return false;
+    }
+    if (command === 'node') {
+      const isTest = args.some(arg => arg.includes('test') || arg.includes('spec'));
+      if (!isTest) return false;
     }
 
     // Check each argument
@@ -316,6 +347,97 @@ class RTKExecutor {
    */
   static getAllowlist() {
     return { ...ALLOWLIST };
+  }
+
+  /**
+   * Check if a command is a test command for post-processing
+   * @private
+   */
+  isTestCommand(command, args) {
+    const testCommands = ['npm', 'cargo', 'pytest', 'vitest', 'jest', 'node'];
+    if (!testCommands.includes(command)) return false;
+    
+    if (command === 'npm' || command === 'cargo') {
+      return args.includes('test');
+    }
+    
+    if (command === 'node') {
+      return args.some(arg => arg.includes('test') || arg.includes('spec'));
+    }
+    
+    return true;
+  }
+
+  /**
+   * Process test output to limit failures and add summary
+   * @private
+   */
+  processTestOutput(stdout, stderr, exitCode) {
+    if (!stdout && !stderr) return stdout;
+
+    // Handle timeouts
+    if (exitCode === 124 || exitCode === null) {
+      const lines = stdout.split('\n');
+      if (lines.length > 50) {
+        return `[Timeout - showing last 50 lines]\n...\n` + lines.slice(-50).join('\n');
+      }
+      return stdout;
+    }
+
+    const lines = stdout.split('\n');
+    const processedLines = [];
+    let failureCount = 0;
+    let inFailure = false;
+    let failureBuffer = [];
+    
+    // Look for failure patterns
+    for (const line of lines) {
+      if (line.includes('FAIL:') || line.startsWith('✖') || line.includes('Failure in')) {
+        if (inFailure) {
+          if (failureCount <= 5) {
+            processedLines.push(...failureBuffer);
+          }
+          failureBuffer = [];
+        }
+        
+        inFailure = true;
+        failureCount++;
+        failureBuffer.push(line);
+      } else if (inFailure && (line.startsWith('  ') || line.includes('at '))) {
+        failureBuffer.push(line);
+      } else if (line.trim() === '' && inFailure) {
+        failureBuffer.push(line);
+      } else {
+        if (inFailure) {
+          if (failureCount <= 5) {
+            processedLines.push(...failureBuffer);
+          }
+          inFailure = false;
+          failureBuffer = [];
+        }
+        processedLines.push(line);
+      }
+    }
+
+    if (inFailure && failureCount <= 5) {
+      processedLines.push(...failureBuffer);
+    }
+
+    let result = processedLines.join('\n');
+    
+    if (failureCount > 5) {
+      result += `\n\n[... ${failureCount - 5} more failures omitted for token efficiency ...]`;
+    }
+
+    // Append summary based on output
+    const summaryMatch = stdout.match(/(\d+)\s+passed,?\s+(\d+)\s+failed/i);
+    if (summaryMatch) {
+      result += `\n\nTest Summary: ${summaryMatch[1]} passed, ${summaryMatch[2]} failed`;
+    } else if (!result.includes('passed') && !result.includes('failed')) {
+      result += `\n\nTest Summary: ${failureCount > 0 ? failureCount : 'No'} failure(s) detected.`;
+    }
+
+    return result;
   }
 }
 
