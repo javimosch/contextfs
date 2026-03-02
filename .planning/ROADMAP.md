@@ -17,8 +17,8 @@
 |-------|-------|-------|--------|-----------|
 | 8 | Infrastructure & Docker Setup | 2/2 | Complete | 2026-03-01 |
 | 9 | MCP Integration Layer | 4/4 | Complete | 2026-03-01 |
-| 10 | 4/4 | Complete    | 2026-03-01 | 2026-03-01 |
-| 11 | Test Optimization & Advanced Features | 2/2 | Ready | - |
+| 10 | Core Command Integration | 3/3 | Complete | 2026-03-01 |
+| 11 | Test Optimization & Advanced Features | 1/2 | In Progress | - |
 
 ## Phases
 
@@ -39,7 +39,8 @@
 - [x] **Phase 8: Infrastructure & Docker Setup** - RTK binary installed with multi-arch support, shell wrappers, and health checks (completed 2026-03-01)
 - [x] **Phase 9: MCP Integration Layer** - Configuration toggles, availability detection, and robust error handling with graceful fallback (completed 2026-03-01)
 - [x] **Phase 10: Core Command Integration** - ls, grep, git, and docker commands proxied through RTK with token reduction verification (completed 2026-03-01)
-- [ ] **Phase 11: Test Optimization & Advanced Features** - Pattern detection for tests, read/smart tools, and ultra-compact mode
+- [x] **Phase 11: Test Optimization & Advanced Features** - Pattern detection for tests, failure filtering, and token reduction verification (Plan 01 complete 2026-03-02)
+- [ ] **Phase 11 (Remaining): Advanced Features** - Smart/read tools and ultra-compact mode
 
 ## Phase Details
 
@@ -150,10 +151,10 @@ Wave 3: 10-03 (Verification and bash adapter - depends on 10-02) ✓ Complete
 6. Ultra-compact mode (`-u` flag) produces maximum compression when requested
 7. Supported command flags pass through to RTK without errors
 
-**Plans:** 2/2 plans complete
+**Plans:** 1/2 plans complete
 
 **Plan List:**
-- [ ] `11-01-PLAN.md` — RTK proxying for test commands with failure filtering (TEST-01 to TEST-05)
+- [x] `11-01-PLAN.md` — RTK proxying for test commands with failure filtering (TEST-01 to TEST-05) ✓ Complete
 - [ ] `11-02-PLAN.md` — Smart/read tools and ultra-compact mode (ADV-01 to ADV-04)
 
 **Wave Structure:**
@@ -224,16 +225,16 @@ Phase 11 (Test + Advanced)
 | CORE-04 | Phase 10 | `docker` commands proxied through RTK | ✅ Complete
 | CORE-05 | Phase 10 | Exit codes preserved | ✅ Complete
 | CORE-06 | Phase 10 | 60-80% token reduction verified | ✅ Complete
-| TEST-01 | Phase 11 | Pattern detection for test commands |
-| TEST-02 | Phase 11 | `rtk test` wrapper |
-| TEST-03 | Phase 11 | `npm test` proxied through RTK |
-| TEST-04 | Phase 11 | `cargo test` proxied through RTK |
-| TEST-05 | Phase 11 | 85-90% token reduction for tests |
+| TEST-01 | Phase 11 | Pattern detection for test commands | ✅ Complete |
+| TEST-02 | Phase 11 | `rtk test` wrapper | ✅ Complete |
+| TEST-03 | Phase 11 | `npm test` proxied through RTK | ✅ Complete |
+| TEST-04 | Phase 11 | `cargo test` proxied through RTK | ✅ Complete |
+| TEST-05 | Phase 11 | 85-90% token reduction for tests | ✅ Complete |
 | ADV-01 | Phase 11 | `read` tool with RTK integration |
 | ADV-02 | Phase 11 | `smart` tool for code summaries |
 | ADV-03 | Phase 11 | Tee output recovery enabled |
 | ADV-04 | Phase 11 | Ultra-compact mode (`-u` flag) |
-| ADV-05 | Phase 11 | Argument passthrough for flags |
+| ADV-05 | Phase 11 | Argument passthrough for flags | ✅ Complete |
 
 ## Research Context
 
@@ -247,4 +248,4 @@ See `.planning/research/SUMMARY.md` for full details.
 
 ---
 
-*Roadmap updated: 2026-03-01 — Phase 10-03 complete (Token reduction verification and bash-rtk-adapter with 71 new tests)*
+*Roadmap updated: 2026-03-02 — Phase 11-01 complete (Test optimization)*

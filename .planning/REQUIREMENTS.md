@@ -33,11 +33,11 @@ Requirements for RTK integration milestone. Each maps to roadmap phases.
 
 ### Test Optimization
 
-- [ ] **TEST-01**: Pattern detection for test commands (`*test*`, `cargo test`, `npm test`)
-- [ ] **TEST-02**: `rtk test` wrapper for bash test execution
-- [ ] **TEST-03**: `npm test` proxied through RTK with failures-only output
-- [ ] **TEST-04**: `cargo test` proxied through RTK with failures-only output
-- [ ] **TEST-05**: 85-90% token reduction verified for test commands
+- [x] **TEST-01**: Pattern detection for test commands (`*test*`, `cargo test`, `npm test`)
+- [x] **TEST-02**: `rtk test` wrapper for bash test execution
+- [x] **TEST-03**: `npm test` proxied through RTK with failures-only output
+- [x] **TEST-04**: `cargo test` proxied through RTK with failures-only output
+- [x] **TEST-05**: 85-90% token reduction verified for test commands
 
 ### Advanced Features
 
@@ -45,7 +45,7 @@ Requirements for RTK integration milestone. Each maps to roadmap phases.
 - [ ] **ADV-02**: `smart` tool using RTK for 2-line code summaries
 - [ ] **ADV-03**: Tee output recovery enabled for debugging failures
 - [ ] **ADV-04**: Ultra-compact mode (`-u` flag) support for maximum compression
-- [ ] **ADV-05**: Argument passthrough for supported command flags
+- [x] **ADV-05**: Argument passthrough for supported command flags
 
 ### Error Handling
 
@@ -111,16 +111,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CORE-04 | Phase 10 | Complete |
 | CORE-05 | Phase 10 | Complete |
 | CORE-06 | Phase 10 | Complete |
-| TEST-01 | Phase 11 | Pending |
-| TEST-02 | Phase 11 | Pending |
-| TEST-03 | Phase 11 | Pending |
-| TEST-04 | Phase 11 | Pending |
-| TEST-05 | Phase 11 | Pending |
+| TEST-01 | Phase 11 | Complete |
+| TEST-02 | Phase 11 | Complete |
+| TEST-03 | Phase 11 | Complete |
+| TEST-04 | Phase 11 | Complete |
+| TEST-05 | Phase 11 | Complete |
 | ADV-01 | Phase 11 | Pending |
 | ADV-02 | Phase 11 | Pending |
 | ADV-03 | Phase 11 | Pending |
 | ADV-04 | Phase 11 | Pending |
-| ADV-05 | Phase 11 | Pending |
+| ADV-05 | Phase 11 | Complete |
 
 **Coverage:**
 - v1 requirements: 29 total

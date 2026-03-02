@@ -39,7 +39,9 @@ const ALLOWLIST = {
   'pytest': ['-v', '-s'],
   'vitest': ['run'],
   'jest': ['--ci'],
-  'node': ['--require', '-r']
+  'node': ['--require', '-r'],
+  'read': ['--level', 'minimal', 'default', 'full'],
+  'smart': []
 };
 
 /**
@@ -101,6 +103,18 @@ class RTKExecutor {
     // Check if command is in allowlist
     if (!this.isSupportedCommand(command, args)) {
       return this.nativeExecutor.execute(command, args, options);
+    }
+
+    // Special handling for smart tool
+    if (command === 'smart') {
+      try {
+        return await this.executeSmart(args, options);
+      } catch (error) {
+        if (error instanceof RTKExecutionError && error.shouldFallback) {
+          return this.nativeExecutor.execute('cat', args, options);
+        }
+        throw error;
+      }
     }
 
     // Try RTK first
@@ -207,10 +221,7 @@ class RTKExecutor {
             ));
           } else {
             // Tier 3 - no fallback, return the error result
-            let processedStdout = stdout;
-            if (this.isTestCommand(command, args)) {
-              processedStdout = this.processTestOutput(stdout, stderr, code);
-            }
+            const processedStdout = this.processOutput(stdout, stderr, code, command, args, options);
 
             resolve({
               stdout: processedStdout,
@@ -223,10 +234,7 @@ class RTKExecutor {
         }
 
         // Success
-        let processedStdout = stdout;
-        if (this.isTestCommand(command, args)) {
-          processedStdout = this.processTestOutput(stdout, stderr, code);
-        }
+        const processedStdout = this.processOutput(stdout, stderr, code, command, args, options);
 
         resolve({
           stdout: processedStdout,
@@ -236,6 +244,102 @@ class RTKExecutor {
         });
       });
     });
+  }
+
+  /**
+   * Execute smart summary tool
+   * @private
+   */
+  async executeSmart(args, options) {
+    const filePath = args[0];
+    if (!filePath) {
+      throw new Error('File path is required for smart tool');
+    }
+
+    try {
+      // 1. Get total line count
+      const wcResult = await this.executeRTK('wc', ['-l', filePath], options);
+      const lineCountStr = wcResult.stdout.trim().split(/\s+/)[0];
+      const lineCount = parseInt(lineCountStr, 10) || 0;
+
+      // 2. Short-circuit for small files (< 10 lines)
+      if (lineCount < 10) {
+        return this.executeRTK('read', [filePath], options);
+      }
+
+      // 3. Get smart summary using minimal level
+      const smartResult = await this.executeRTK('read', ['--level', 'minimal', filePath], options);
+
+      // 4. Calculate complexity
+      let complexity = 'Low';
+      if (lineCount > 500) complexity = 'High';
+      else if (lineCount >= 100) complexity = 'Medium';
+
+      // 5. Add header metadata
+      const header = [
+        `File: ${filePath}`,
+        `Lines: ${lineCount}`,
+        `Complexity: ${complexity}`,
+        '---',
+        ''
+      ].join('\n');
+
+      return {
+        ...smartResult,
+        stdout: header + smartResult.stdout
+      };
+    } catch (error) {
+      // Re-throw if already an RTKExecutionError
+      if (error instanceof RTKExecutionError) throw error;
+
+      // Handle other errors
+      throw new RTKExecutionError(
+        'tool-error',
+        `Smart tool failed: ${error.message}`,
+        { shouldFallback: true }
+      );
+    }
+  }
+
+  /**
+   * Post-process command output
+   * @private
+   */
+  processOutput(stdout, stderr, code, command, args, options) {
+    if (this.isTestCommand(command, args)) {
+      return this.processTestOutput(stdout, stderr, code);
+    }
+
+    if (command === 'read') {
+      return this.processReadOutput(stdout, stderr, code, args, options);
+    }
+
+    return stdout;
+  }
+
+  /**
+   * Process read output with large file filtering
+   * @private
+   */
+  processReadOutput(stdout, stderr, code, args, options) {
+    if (code !== 0 || !options.largeFileFilter) {
+      return stdout;
+    }
+
+    const lines = stdout.split('\n');
+    if (lines.length <= 500) {
+      return stdout;
+    }
+
+    const first100 = lines.slice(0, 100);
+    const last100 = lines.slice(-100);
+    const filteredCount = lines.length - 200;
+
+    return [
+      ...first100,
+      `\n[... ${filteredCount} lines filtered for token efficiency ...]\n`,
+      ...last100
+    ].join('\n');
   }
 
   /**
@@ -262,7 +366,9 @@ class RTKExecutor {
       'pytest': ['pytest', ...args],
       'vitest': ['vitest', ...args],
       'jest': ['jest', ...args],
-      'node': ['node', ...args]
+      'node': ['node', ...args],
+      'read': ['read', ...args],
+      'smart': ['read', '--level', 'minimal', ...args]
     };
 
     return commandMappings[command] || [command, ...args];
