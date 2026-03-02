@@ -5,8 +5,25 @@ const fs = require('fs');
 const os = require('os');
 const crypto = require('crypto');
 const { logVerbose, isComplexShellCommand, isCommandAllowed, resolveSafePath, requiresStdinWithoutInput } = require('./utils');
-const { getTimeoutVariant, runCommand, runCommandStreaming } = require('./spawn');
+const { getTimeoutVariant, runCommand, runCommandStreaming, isContainerEnvironment } = require('./spawn');
 const { validateParams, TOOLS } = require('../shared/protocol');
+
+// Lazy-load RTKExecutor for RTK-enhanced tools
+let rtkExecutor = null;
+function getRtkExecutor() {
+  if (rtkExecutor !== null) return rtkExecutor;
+  if (isContainerEnvironment()) {
+    try {
+      const { RTKExecutor } = require('../server/mcp/tools/rtk-executor');
+      rtkExecutor = new RTKExecutor();
+    } catch (_) {
+      rtkExecutor = false;
+    }
+  } else {
+    rtkExecutor = false;
+  }
+  return rtkExecutor;
+}
 
 const MAX_SEARCH_DEPTH = 5;
 
@@ -59,6 +76,20 @@ async function runFsTool(toolName, params, workspaceRoot, { insecure = false, on
       }
 
       case TOOLS.READ: {
+        const rtkExec = getRtkExecutor();
+        // If RTK is available and no byte/line limits are requested, use RTK for enhanced reading
+        if (rtkExec && !params.start_line && !params.end_line && !params.max_bytes) {
+          try {
+            const result = await rtkExec.execute('read', [params.path], {
+              cwd: workspaceRoot,
+              largeFileFilter: params.largeFileFilter !== false
+            });
+            return { ok: true, result: { path: params.path, content: result.stdout } };
+          } catch (error) {
+            logVerbose(`[RTK] Read failed, falling back to native: ${error.message}`);
+          }
+        }
+
         const filePath = resolveSafePath(workspaceRoot, params.path);
         if (!fs.existsSync(filePath)) return { ok: false, error: `File not found: ${params.path}` };
         let content = fs.readFileSync(filePath, 'utf8');
@@ -72,6 +103,22 @@ async function runFsTool(toolName, params, workspaceRoot, { insecure = false, on
           content = lines.slice(start, end).join('\n');
         }
         return { ok: true, result: { path: params.path, content } };
+      }
+
+      case TOOLS.SMART: {
+        const rtkExec = getRtkExecutor();
+        if (rtkExec) {
+          try {
+            const result = await rtkExec.execute('smart', [params.path], {
+              cwd: workspaceRoot
+            });
+            return { ok: true, result: { path: params.path, content: result.stdout } };
+          } catch (error) {
+            logVerbose(`[RTK] Smart tool failed: ${error.message}`);
+          }
+        }
+        // Fallback to basic read if smart is not available
+        return await runFsTool(TOOLS.READ, params, workspaceRoot, { insecure });
       }
 
       case TOOLS.WRITE: {

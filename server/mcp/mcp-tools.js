@@ -58,6 +58,29 @@ const TOOLS = [
           type: 'number',
           description: 'Maximum number of bytes to return.',
         },
+        largeFileFilter: {
+          type: 'boolean',
+          description: 'Whether to filter large files (>500 lines) showing only start and end sections. Default: true.',
+        },
+        timeoutMs: {
+          type: 'number',
+          description: 'Timeout in milliseconds for this tool call.',
+        },
+      },
+      additionalProperties: false,
+    },
+  },
+  {
+    name: 'contextfs.smart',
+    description: 'Get an intelligent summary of a code file including signatures, docstrings, exports, and complexity metrics. Optimized for token efficiency.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'File path relative to workspace root.',
+        },
         timeoutMs: {
           type: 'number',
           description: 'Timeout in milliseconds for this tool call.',
