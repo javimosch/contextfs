@@ -132,12 +132,22 @@ class RTKConfig {
       }
     }
 
+    // Parse ultraCompact with default
+    let ultraCompact = false;
+    if (process.env.CONTEXTFS_RTK_ULTRA_COMPACT !== undefined) {
+      const parsedCompact = this.parseBoolean(process.env.CONTEXTFS_RTK_ULTRA_COMPACT);
+      if (parsedCompact !== undefined) {
+        ultraCompact = parsedCompact;
+      }
+    }
+
     cachedConfig = {
       enabled,
       autoDetected,
       binaryPath: process.env.CONTEXTFS_RTK_PATH || 'rtk',
       timeout,
       teeOnError,
+      ultraCompact,
       containerStatus: process.env.CONTEXTFS_RTK_STATUS
     };
 

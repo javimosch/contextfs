@@ -22,26 +22,26 @@ const { NativeExecutor } = require('./native-executor.js');
  * @readonly
  */
 const ALLOWLIST = {
-  'ls': ['-l', '-a', '-la', '-al', '-R', '--color', '-1', '-h', '-lah', '-ltr'],
-  'grep': ['-i', '-v', '-r', '-n', '-E', '-F', '--color', '-l', '-c', '-w'],
-  'rg': ['-i', '-v', '-n', '-l', '-c', '--color', '-w', '-t', '-g', '-A', '-B', '-C'],
-  'git': ['status', 'diff', 'log', 'show', 'branch', 'ls-files'],
-  'cat': [],
-  'head': ['-n'],
-  'tail': ['-n', '-f'],
-  'wc': ['-l', '-w', '-c'],
-  'find': ['-name', '-type', '-exec', '-print', '-maxdepth'],
-  'sort': ['-n', '-r', '-k', '-t'],
+  'ls': ['-l', '-a', '-la', '-al', '-R', '--color', '-1', '-h', '-lah', '-ltr', '-u'],
+  'grep': ['-i', '-v', '-r', '-n', '-E', '-F', '--color', '-l', '-c', '-w', '-u'],
+  'rg': ['-i', '-v', '-n', '-l', '-c', '--color', '-w', '-t', '-g', '-A', '-B', '-C', '-u'],
+  'git': ['status', 'diff', 'log', 'show', 'branch', 'ls-files', '-u'],
+  'cat': ['-u'],
+  'head': ['-n', '-u'],
+  'tail': ['-n', '-f', '-u'],
+  'wc': ['-l', '-w', '-c', '-u'],
+  'find': ['-name', '-type', '-exec', '-print', '-maxdepth', '-u'],
+  'sort': ['-n', '-r', '-k', '-t', '-u'],
   'uniq': ['-c', '-d', '-u'],
-  'docker': ['ps', 'images'],
-  'npm': ['test', '--test', '-t', '--prefix'],
-  'cargo': ['test'],
-  'pytest': ['-v', '-s'],
-  'vitest': ['run'],
-  'jest': ['--ci'],
-  'node': ['--require', '-r'],
-  'read': ['--level', 'minimal', 'default', 'full'],
-  'smart': []
+  'docker': ['ps', 'images', '-u'],
+  'npm': ['test', '--test', '-t', '--prefix', '-u'],
+  'cargo': ['test', '-u'],
+  'pytest': ['-v', '-s', '-u'],
+  'vitest': ['run', '-u'],
+  'jest': ['--ci', '-u'],
+  'node': ['--require', '-r', '-u'],
+  'read': ['--level', 'minimal', 'default', 'full', '-u'],
+  'smart': ['-u']
 };
 
 /**
@@ -144,7 +144,7 @@ class RTKExecutor {
       timeout = this.config.timeout
     } = options;
 
-    const rtkArgs = this.mapToRTKArgs(command, args);
+    const rtkArgs = this.mapToRTKArgs(command, args, options);
 
     return new Promise((resolve, reject) => {
       const stdoutChunks = [];
@@ -306,15 +306,62 @@ class RTKExecutor {
    * @private
    */
   processOutput(stdout, stderr, code, command, args, options) {
+    let result = stdout;
+
     if (this.isTestCommand(command, args)) {
-      return this.processTestOutput(stdout, stderr, code);
+      result = this.processTestOutput(stdout, stderr, code);
+    } else if (command === 'read') {
+      result = this.processReadOutput(stdout, stderr, code, args, options);
     }
 
-    if (command === 'read') {
-      return this.processReadOutput(stdout, stderr, code, args, options);
+    // Apply ultra-compact formatting if active
+    if (this.config.ultraCompact || options.ultraCompact || args.includes('-u')) {
+      result = this.processUltraCompact(result, command, args);
     }
 
-    return stdout;
+    return result;
+  }
+
+  /**
+   * Process output for ultra-compact mode
+   * @private
+   */
+  processUltraCompact(stdout, command, args) {
+    if (!stdout) return stdout;
+
+    let result = stdout;
+
+    // Specialized formatting for specific commands
+    if (command === 'git' && args.includes('log')) {
+      const lines = stdout.split('\n');
+      result = lines.map(line => {
+        const match = line.match(/^([a-f0-9]{7,40})\s+(?:\(.*?\)\s+)?(.*)$/);
+        if (match) {
+          const hash = match[1].substring(0, 7);
+          const msg = match[2].substring(0, 30).trim();
+          return `${hash} ${msg}`;
+        }
+        return line;
+      }).join('\n');
+    } else if (command === 'ls') {
+      const lines = stdout.split('\n');
+      result = lines.map(line => {
+        const parts = line.trim().split(/\s+/);
+        // Match typical ls -l output: -rw-r--r-- 1 user group size date filename
+        if (parts.length >= 9 && (parts[0].startsWith('-') || parts[0].startsWith('d'))) {
+          const size = parts[4];
+          const name = parts.slice(8).join(' ');
+          return `${name} ${size}`;
+        }
+        return line;
+      }).join('\n');
+    }
+
+    // Aggressive whitespace stripping and empty line filtering
+    return result.split('\n')
+      .map(line => line.trim())
+      .filter(line => line.length > 0)
+      .join('\n');
   }
 
   /**
@@ -346,7 +393,7 @@ class RTKExecutor {
    * Map native command to RTK arguments
    * @private
    */
-  mapToRTKArgs(command, args) {
+  mapToRTKArgs(command, args, options = {}) {
     // Map common commands to RTK subcommands
     const commandMappings = {
       'ls': ['ls', ...args],
@@ -371,7 +418,16 @@ class RTKExecutor {
       'smart': ['read', '--level', 'minimal', ...args]
     };
 
-    return commandMappings[command] || [command, ...args];
+    const rtkArgs = commandMappings[command] || [command, ...args];
+
+    // Add ultra-compact flag if enabled globally or via options
+    if (this.config.ultraCompact || options.ultraCompact || args.includes('-u')) {
+      if (!rtkArgs.includes('-u')) {
+        rtkArgs.push('-u');
+      }
+    }
+
+    return rtkArgs;
   }
 
   /**
