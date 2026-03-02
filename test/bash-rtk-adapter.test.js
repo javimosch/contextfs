@@ -26,7 +26,10 @@ describe('BashRTKAdapter', () => {
     // Create mock RTK executor
     mockRtkExecutor = {
       isSupportedCommand: (cmd, args) => {
-        const supported = ['ls', 'grep', 'git', 'cat', 'head', 'tail', 'wc', 'find', 'sort', 'uniq'];
+        const supported = [
+          'ls', 'grep', 'git', 'cat', 'head', 'tail', 'wc', 'find', 'sort', 'uniq',
+          'npm', 'cargo', 'pytest', 'vitest', 'jest', 'node'
+        ];
         return supported.includes(cmd);
       }
     };
@@ -443,6 +446,52 @@ cat file.txt | head -5`;
 
       assert.strictEqual(commands[0].type, 'simple');
       assert.strictEqual(commands[0].args[0], '/path/to/directory');
+    });
+  });
+
+  describe('test command routing', () => {
+    it('should route npm test through RTK', () => {
+      const script = 'npm test';
+      const commands = adapter.parseScript(script);
+
+      assert.strictEqual(commands.length, 1);
+      assert.strictEqual(commands[0].type, 'simple');
+      assert.strictEqual(commands[0].command, 'npm');
+    });
+
+    it('should route cargo test through RTK', () => {
+      const script = 'cargo test';
+      const commands = adapter.parseScript(script);
+
+      assert.strictEqual(commands.length, 1);
+      assert.strictEqual(commands[0].type, 'simple');
+      assert.strictEqual(commands[0].command, 'cargo');
+    });
+
+    it('should route node with test file through RTK', () => {
+      const script = 'node test/my.test.js';
+      const commands = adapter.parseScript(script);
+
+      assert.strictEqual(commands.length, 1);
+      assert.strictEqual(commands[0].type, 'simple');
+      assert.strictEqual(commands[0].command, 'node');
+    });
+    
+    it('should route pytest through RTK', () => {
+      const script = 'pytest';
+      const commands = adapter.parseScript(script);
+
+      assert.strictEqual(commands.length, 1);
+      assert.strictEqual(commands[0].type, 'simple');
+      assert.strictEqual(commands[0].command, 'pytest');
+    });
+
+    it('should NOT route node without test pattern', () => {
+      const script = 'node app.js';
+      const commands = adapter.parseScript(script);
+
+      assert.strictEqual(commands.length, 1);
+      assert.strictEqual(commands[0].type, 'complex');
     });
   });
 

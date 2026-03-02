@@ -28,7 +28,8 @@ class BashRTKAdapter {
     // RTK-supported commands
     this.rtkCommands = new Set([
       'ls', 'grep', 'rg', 'git', 'cat', 'head', 'tail', 
-      'wc', 'find', 'sort', 'uniq'
+      'wc', 'find', 'sort', 'uniq',
+      'npm', 'cargo', 'pytest', 'vitest', 'jest'
     ]);
     
     // Shell metacharacters that indicate complex commands
@@ -197,7 +198,17 @@ class BashRTKAdapter {
     }
     
     if (!this.rtkCommands.has(parsed.command)) {
-      return false;
+      // Check for test patterns if it's not a standard RTK command
+      const isTestFile = parsed.args.some(arg => 
+        arg.includes('test.js') || 
+        arg.includes('test.ts') || 
+        arg.includes('spec.js') || 
+        arg.includes('spec.ts')
+      );
+      
+      if (!isTestFile) {
+        return false;
+      }
     }
     
     // Check if spawn wrapper is available
