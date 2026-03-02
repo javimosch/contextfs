@@ -41,10 +41,10 @@ Requirements for RTK integration milestone. Each maps to roadmap phases.
 
 ### Advanced Features
 
-- [ ] **ADV-01**: `read` tool integrated with RTK for filtered file reading
-- [ ] **ADV-02**: `smart` tool using RTK for 2-line code summaries
-- [ ] **ADV-03**: Tee output recovery enabled for debugging failures
-- [ ] **ADV-04**: Ultra-compact mode (`-u` flag) support for maximum compression
+- [x] **ADV-01**: `read` tool integrated with RTK for filtered file reading
+- [x] **ADV-02**: `smart` tool using RTK for 2-line code summaries
+- [x] **ADV-03**: Tee output recovery enabled for debugging failures
+- [x] **ADV-04**: Ultra-compact mode (`-u` flag) support for maximum compression
 - [x] **ADV-05**: Argument passthrough for supported command flags
 
 ### Error Handling
@@ -116,10 +116,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TEST-03 | Phase 11 | Complete |
 | TEST-04 | Phase 11 | Complete |
 | TEST-05 | Phase 11 | Complete |
-| ADV-01 | Phase 11 | Pending |
-| ADV-02 | Phase 11 | Pending |
-| ADV-03 | Phase 11 | Pending |
-| ADV-04 | Phase 11 | Pending |
+| ADV-01 | Phase 11 | Complete |
+| ADV-02 | Phase 11 | Complete |
+| ADV-03 | Phase 11 | Complete |
+| ADV-04 | Phase 11 | Complete |
 | ADV-05 | Phase 11 | Complete |
 
 **Coverage:**
