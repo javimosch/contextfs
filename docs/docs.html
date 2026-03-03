@@ -221,7 +221,7 @@ Authorization: Bearer <key></pre>
               <td>Read file content. Supports line ranges, byte limits, and <strong>automatic filtering for large files (>500 lines)</strong>.</td>
             </tr>
             <tr>
-              <td>`contextfs.smart`</td>
+              <td>`contextfs.summarize`</td>
               <td><strong>(New)</strong> Get an intelligent summary of a code file (signatures, docstrings, complexity metrics) at 90% lower token cost.</td>
             </tr>
             <tr>
@@ -271,7 +271,7 @@ Authorization: Bearer <key></pre>
       <ul class="list-disc pl-6 mb-4 space-y-2">
         <li><strong>Core Commands</strong>: <code>ls</code>, <code>grep</code>, <code>git</code>, and <code>docker</code> are automatically proxied through RTK to strip redundant metadata and formatting.</li>
         <li><strong>Test Optimization</strong>: <code>npm test</code>, <code>cargo test</code>, and <code>pytest</code> outputs are filtered to show only the first 5 failures and a summary, preventing token blowup on large suites.</li>
-        <li><strong>Intelligent Summarization</strong>: The <code>contextfs.smart</code> tool leverages RTK's structural analysis to provide code overviews without reading full file content.</li>
+        <li><strong>Intelligent Summarization</strong>: The <code>contextfs.summarize</code> tool leverages RTK's structural analysis to provide code overviews without reading full file content.</li>
         <li><strong>Ultra-Compact Mode</strong>: Force maximum compression by setting <code>CONTEXTFS_RTK_ULTRA_COMPACT=true</code> or passing the <code>-u</code> flag to supported commands.</li>
       </ul>
 

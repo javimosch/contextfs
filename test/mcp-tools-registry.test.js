@@ -8,11 +8,11 @@ const { getAllTools, getToolDefinition } = require('../server/mcp/mcp-tools.js')
 const { TOOLS, SCHEMAS } = require('../shared/protocol.js');
 
 describe('MCP Tools Registry', () => {
-  it('should have contextfs.smart in the tools list', () => {
+  it('should have contextfs.summarize in the tools list', () => {
     const tools = getAllTools();
-    const smart = tools.find(t => t.name === 'contextfs.smart');
-    assert.ok(smart, 'contextfs.smart not found in tools list');
-    assert.strictEqual(smart.description.includes('intelligent summary'), true);
+    const summarize = tools.find(t => t.name === 'contextfs.summarize');
+    assert.ok(summarize, 'contextfs.summarize not found in tools list');
+    assert.strictEqual(summarize.description.includes('intelligent summary'), true);
   });
 
   it('should have largeFileFilter in contextfs.read schema', () => {
@@ -23,8 +23,8 @@ describe('MCP Tools Registry', () => {
     assert.ok(SCHEMAS['contextfs.read'].properties.largeFileFilter, 'largeFileFilter missing from shared protocol schema');
   });
 
-  it('should have contextfs.smart in shared protocol TOOLS', () => {
-    assert.strictEqual(TOOLS.SMART, 'contextfs.smart');
-    assert.ok(SCHEMAS[TOOLS.SMART], 'contextfs.smart schema missing from shared protocol');
+  it('should have contextfs.summarize in shared protocol TOOLS', () => {
+    assert.strictEqual(TOOLS.SUMMARIZE, 'contextfs.summarize');
+    assert.ok(SCHEMAS[TOOLS.SUMMARIZE], 'contextfs.summarize schema missing from shared protocol');
   });
 });

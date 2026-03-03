@@ -15,8 +15,8 @@ describe('RTKExecutor - Ultra-Compact Mode', () => {
 
   describe('git log formatting', () => {
     it('should compress git log output', () => {
-      const stdout = '26b028e002c3ebc7527e07d49ae1a1e009fba596 (HEAD -> master) feat(11-02): implement read and smart support\n' +
-                     'effdc6b002c3ebc7527e07d49ae1a1e009fba597 Register and wire contextfs.smart\n';
+      const stdout = '26b028e002c3ebc7527e07d49ae1a1e009fba596 (HEAD -> master) feat(11-02): implement read and summarize support\n' +
+                     'effdc6b002c3ebc7527e07d49ae1a1e009fba597 Register and wire contextfs.summarize\n';
       
       const result = executor.processUltraCompact(stdout, 'git', ['log']);
       

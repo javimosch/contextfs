@@ -43,14 +43,14 @@ describe('RTKExecutor - Read & Smart', () => {
     });
   });
 
-  describe('Smart Tool Logic', () => {
-    it('should map smart command to read with minimal level', () => {
-      const args = executor.mapToRTKArgs('smart', ['file.js']);
+  describe('Summarize Tool Logic', () => {
+    it('should map summarize command to read with minimal level', () => {
+      const args = executor.mapToRTKArgs('summarize', ['file.js']);
       assert.deepStrictEqual(args, ['read', '--level', 'minimal', 'file.js']);
     });
     
-    it('should support smart in allowlist', () => {
-      assert.strictEqual(executor.isSupportedCommand('smart', ['file.js']), true);
+    it('should support summarize in allowlist', () => {
+      assert.strictEqual(executor.isSupportedCommand('summarize', ['file.js']), true);
     });
 
     it('should support read in allowlist with flags', () => {
@@ -59,7 +59,7 @@ describe('RTKExecutor - Read & Smart', () => {
     });
   });
 
-  describe('executeSmart', () => {
+  describe('executeSummarize', () => {
     it('should short-circuit for small files', async () => {
       let rtkCalls = [];
       executor.executeRTK = async (cmd, args) => {
@@ -68,7 +68,7 @@ describe('RTKExecutor - Read & Smart', () => {
         if (cmd === 'read') return { stdout: 'full content', stderr: '', exitCode: 0, source: 'rtk' };
       };
 
-      const result = await executor.executeSmart(['file.js'], {});
+      const result = await executor.executeSummarize(['file.js'], {});
       
       assert.strictEqual(result.stdout, 'full content');
       assert.deepStrictEqual(rtkCalls[0], { cmd: 'wc', args: ['-l', 'file.js'] });
@@ -81,7 +81,7 @@ describe('RTKExecutor - Read & Smart', () => {
         if (cmd === 'read') return { stdout: 'signatures content', stderr: '', exitCode: 0, source: 'rtk' };
       };
 
-      const result = await executor.executeSmart(['file.js'], {});
+      const result = await executor.executeSummarize(['file.js'], {});
       
       assert.ok(result.stdout.includes('File: file.js'));
       assert.ok(result.stdout.includes('Lines: 200'));

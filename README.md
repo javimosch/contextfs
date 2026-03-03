@@ -186,7 +186,7 @@ All tools are sandboxed within the virtual client's active workspace root.
 |---|---|
 | `contextfs.list` | List files/directories. Supports recursive, depth, glob filter. **(RTK Optimized)** |
 | `contextfs.read` | Read file content. Supports line ranges, byte limits, and **automatic filtering for large files (>500 lines)**. |
-| `contextfs.smart` | **(New)** Get an intelligent summary of a code file (signatures, docstrings, complexity) at 90% lower token cost. |
+| `contextfs.summarize` | **(New)** Get an intelligent summary of a code file (signatures, docstrings, complexity) at 90% lower token cost. |
 | `contextfs.write` | Write or append to a file. |
 | `contextfs.list_workspaces` | List available workspaces for the current virtual client. |
 | `contextfs.use_workspace` | Switch the active workspace for the current session. |
@@ -209,7 +209,7 @@ ContextFS integrates [RTK (Rust Token Killer)](https://github.com/rtk-ai/rtk) to
 When running in a Docker container or where the `rtk` binary is available:
 - **Core Commands**: `ls`, `grep`, `git`, and `docker` are automatically proxied through RTK to strip redundant metadata and formatting.
 - **Test Optimization**: `npm test`, `cargo test`, and `pytest` outputs are filtered to show only the first 5 failures and a summary, preventing token blowup on large suites.
-- **Intelligent Summarization**: The `contextfs.smart` tool leverages RTK's structural analysis to provide code overviews without reading full file content.
+- **Intelligent Summarization**: The `contextfs.summarize` tool leverages RTK's structural analysis to provide code overviews without reading full file content.
 - **Ultra-Compact Mode**: Force maximum compression by setting `CONTEXTFS_RTK_ULTRA_COMPACT=true` or passing the `-u` flag to supported commands.
 
 ### Native Fallback
