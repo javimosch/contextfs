@@ -32,6 +32,7 @@
           <li><a href="#cli-reference" class="link">CLI Reference</a></li>
           <li><a href="#mcp-integration" class="link">MCP Integration</a></li>
           <li><a href="#tools-reference" class="link">Tools Reference</a></li>
+          <li><a href="#rtk-integration" class="link">RTK Integration</a></li>
           <li><a href="#rest-api" class="link">REST API</a></li>
           <li><a href="#security" class="link">Security Model</a></li>
           <li><a href="#environment-vars" class="link">Environment Variables</a></li>
@@ -213,11 +214,15 @@ Authorization: Bearer <key></pre>
           <tbody>
             <tr>
               <td>`contextfs.list`</td>
-              <td>List files/directories. Supports recursive, depth, glob filter.</td>
+              <td>List files/directories. Supports recursive, depth, glob filter. <strong>(RTK Optimized)</strong></td>
             </tr>
             <tr>
               <td>`contextfs.read`</td>
-              <td>Read file content. Supports line ranges and byte limits.</td>
+              <td>Read file content. Supports line ranges, byte limits, and <strong>automatic filtering for large files (>500 lines)</strong>.</td>
+            </tr>
+            <tr>
+              <td>`contextfs.smart`</td>
+              <td><strong>(New)</strong> Get an intelligent summary of a code file (signatures, docstrings, complexity metrics) at 90% lower token cost.</td>
             </tr>
             <tr>
               <td>`contextfs.write`</td>
@@ -249,11 +254,29 @@ Authorization: Bearer <key></pre>
             </tr>
             <tr>
               <td>`contextfs.bash_script_once`</td>
-              <td>Execute a one-shot bash script (requires `--insecure`).</td>
+              <td>Execute a one-shot bash script (requires `--insecure`). <strong>(RTK Optimized for tests)</strong></td>
             </tr>
           </tbody>
         </table>
       </div>
+    </section>
+
+    <!-- RTK Integration -->
+    <section id="rtk-integration" class="section-spacing">
+      <h2 class="text-2xl font-semibold mb-4">RTK Integration (Token Optimization)</h2>
+      <p class="mb-4">ContextFS integrates <a href="https://github.com/rtk-ai/rtk" class="link">RTK (Rust Token Killer)</a> to significantly reduce token consumption (60-90%) when agents interact with the filesystem.</p>
+      
+      <h3 class="text-xl font-medium mb-2">How it works</h3>
+      <p class="mb-2">When running in a Docker container or where the <code>rtk</code> binary is available:</p>
+      <ul class="list-disc pl-6 mb-4 space-y-2">
+        <li><strong>Core Commands</strong>: <code>ls</code>, <code>grep</code>, <code>git</code>, and <code>docker</code> are automatically proxied through RTK to strip redundant metadata and formatting.</li>
+        <li><strong>Test Optimization</strong>: <code>npm test</code>, <code>cargo test</code>, and <code>pytest</code> outputs are filtered to show only the first 5 failures and a summary, preventing token blowup on large suites.</li>
+        <li><strong>Intelligent Summarization</strong>: The <code>contextfs.smart</code> tool leverages RTK's structural analysis to provide code overviews without reading full file content.</li>
+        <li><strong>Ultra-Compact Mode</strong>: Force maximum compression by setting <code>CONTEXTFS_RTK_ULTRA_COMPACT=true</code> or passing the <code>-u</code> flag to supported commands.</li>
+      </ul>
+
+      <h3 class="text-xl font-medium mb-2">Native Fallback</h3>
+      <p>Integration is non-intrusive. If RTK is unavailable, fails, or a command is not supported, ContextFS automatically falls back to native execution to ensure reliability.</p>
     </section>
 
     <!-- REST API Reference -->
@@ -392,6 +415,16 @@ GET /mcp/sessions        Active MCP SSE sessions</pre>
               <td>`CONTEXTFS_MODEL`</td>
               <td>LLM model for chat</td>
               <td>`google/gemini-2.5-flash-preview`</td>
+            </tr>
+            <tr>
+              <td>`CONTEXTFS_RTK_ENABLED`</td>
+              <td>Enable RTK optimization (`true`/`false`)</td>
+              <td>`true` (auto-detect)</td>
+            </tr>
+            <tr>
+              <td>`CONTEXTFS_RTK_ULTRA_COMPACT`</td>
+              <td>Enable ultra-compact mode (`true`)</td>
+              <td>`false`</td>
             </tr>
             <tr>
               <td>`OPENROUTER_API_KEY`</td>
