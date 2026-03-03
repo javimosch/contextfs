@@ -103,8 +103,8 @@ describe('validateParams', () => {
       expect(validateParams(TOOLS.SEARCH_MEMORY, { query: 'hello' })).toEqual({ valid: true });
     });
 
-    test('fails without query', () => {
-      expect(validateParams(TOOLS.SEARCH_MEMORY, {}).valid).toBe(false);
+    test('valid without query (optional)', () => {
+      expect(validateParams(TOOLS.SEARCH_MEMORY, {}).valid).toBe(true);
     });
   });
 
@@ -151,8 +151,8 @@ describe('Protocol constants', () => {
     expect(MSG.S_ASSIGN_VC).toBe('contextfs_assign_virtual_client');
   });
 
-  test('TOOLS has all 10 tool names', () => {
-    expect(Object.keys(TOOLS)).toHaveLength(10);
+  test('TOOLS has all 14 tool names', () => {
+    expect(Object.keys(TOOLS)).toHaveLength(14);
     expect(TOOLS.BASH_SCRIPT_ONCE).toBe('contextfs.bash_script_once');
   });
 });

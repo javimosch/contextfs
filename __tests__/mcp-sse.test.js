@@ -206,7 +206,7 @@ describe('SSE Transport', () => {
     });
 
     const response = await msgPromise;
-    expect(response.result.tools).toHaveLength(10);
+    expect(response.result.tools).toHaveLength(14);
     closeStream();
   });
 

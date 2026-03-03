@@ -76,12 +76,12 @@ describe('McpSseClient', () => {
     client.disconnect();
   });
 
-  test('listTools() returns 10 tool definitions', async () => {
+  test('listTools() returns 14 tool definitions', async () => {
     const client = new McpSseClient(`http://127.0.0.1:${ctx.port}`, { vcId: ctx.vc.id, vcKey: ctx.vc.apiKey });
     await client.connect();
     await client.initialize();
     const tools = await client.listTools();
-    expect(tools).toHaveLength(10);
+    expect(tools).toHaveLength(14);
     expect(tools[0].name).toBeDefined();
     expect(tools[0].description).toBeDefined();
     expect(tools[0].inputSchema).toBeDefined();
@@ -130,8 +130,8 @@ describe('McpSseClient', () => {
 
     const tools1 = await client.listTools();
     const tools2 = await client.listTools();
-    expect(tools1).toHaveLength(10);
-    expect(tools2).toHaveLength(10);
+    expect(tools1).toHaveLength(14);
+    expect(tools2).toHaveLength(14);
 
     const ping = await client.ping();
     expect(ping).toEqual({});

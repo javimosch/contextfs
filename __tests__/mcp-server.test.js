@@ -107,12 +107,12 @@ describe('MCP tools/list', () => {
   let ctx;
   afterEach(() => cleanup(ctx.dir));
 
-  test('returns all 10 tool definitions', async () => {
+  test('returns all 14 tool definitions', async () => {
     ctx = makeSetup();
     const res = await ctx.mcp.handleMessage({
       jsonrpc: '2.0', id: 3, method: 'tools/list',
     });
-    expect(res.result.tools).toHaveLength(10);
+    expect(res.result.tools).toHaveLength(14);
     const names = res.result.tools.map(t => t.name);
     expect(names).toContain('contextfs.list');
     expect(names).toContain('contextfs.read');
@@ -290,9 +290,9 @@ describe('MCP tools/call — dispatch', () => {
 
 // ── mcp-tools definitions ─────────────────────────────────────────────────────
 describe('mcp-tools definitions', () => {
-  test('getAllTools returns 10 tools', () => {
+  test('getAllTools returns 14 tools', () => {
     const tools = getAllTools();
-    expect(tools).toHaveLength(10);
+    expect(tools).toHaveLength(14);
   });
 
   test('all tools have required MCP fields', () => {
