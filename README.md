@@ -184,8 +184,9 @@ All tools are sandboxed within the virtual client's active workspace root.
 
 | Tool | Description |
 |---|---|
-| `contextfs.list` | List files/directories. Supports recursive, depth, glob filter. |
-| `contextfs.read` | Read file content. Supports line ranges and byte limits. |
+| `contextfs.list` | List files/directories. Supports recursive, depth, glob filter. **(RTK Optimized)** |
+| `contextfs.read` | Read file content. Supports line ranges, byte limits, and **automatic filtering for large files (>500 lines)**. |
+| `contextfs.smart` | **(New)** Get an intelligent summary of a code file (signatures, docstrings, complexity) at 90% lower token cost. |
 | `contextfs.write` | Write or append to a file. |
 | `contextfs.list_workspaces` | List available workspaces for the current virtual client. |
 | `contextfs.use_workspace` | Switch the active workspace for the current session. |
@@ -193,7 +194,26 @@ All tools are sandboxed within the virtual client's active workspace root.
 | `contextfs.list_skills` | List skills, optionally filtered by tag. |
 | `contextfs.save_memory` | Persist a memory entry under `/memory/YYYY/MM/`. |
 | `contextfs.search_memory` | Full-text keyword search across all memory files. |
-| `contextfs.bash_script_once` | Execute a one-shot bash script (requires `--insecure`). |
+| `contextfs.memory_summary` | Metadata summary of all memory entries. |
+| `contextfs.memory_by_date` | Retrieve memories from a specific year/month. |
+| `contextfs.memory_by_tag` | Find all memories with a specific tag. |
+| `contextfs.bash_script_once` | Execute a one-shot bash script (requires `--insecure`). **(RTK Optimized for tests)** |
+
+---
+
+## RTK Integration (Token Optimization)
+
+ContextFS integrates [RTK (Rust Token Killer)](https://github.com/rtk-ai/rtk) to significantly reduce token consumption (60-90%) when agents interact with the filesystem.
+
+### How it works
+When running in a Docker container or where the `rtk` binary is available:
+- **Core Commands**: `ls`, `grep`, `git`, and `docker` are automatically proxied through RTK to strip redundant metadata and formatting.
+- **Test Optimization**: `npm test`, `cargo test`, and `pytest` outputs are filtered to show only the first 5 failures and a summary, preventing token blowup on large suites.
+- **Intelligent Summarization**: The `contextfs.smart` tool leverages RTK's structural analysis to provide code overviews without reading full file content.
+- **Ultra-Compact Mode**: Force maximum compression by setting `CONTEXTFS_RTK_ULTRA_COMPACT=true` or passing the `-u` flag to supported commands.
+
+### Native Fallback
+Integration is non-intrusive. If RTK is unavailable, fails, or a command is not supported, ContextFS automatically falls back to native execution to ensure reliability.
 
 ---
 
@@ -310,6 +330,8 @@ All state is persisted to `~/.contextfs/`:
 | `CONTEXTFS_MCP_SERVER` | MCP server base URL for chat | `http://localhost:3010` |
 | `CONTEXTFS_MODEL` | LLM model for chat | `google/gemini-2.5-flash-preview` |
 | `OPENROUTER_API_KEY` | OpenRouter API key for chat | — |
+| `CONTEXTFS_RTK_ENABLED` | Enable RTK optimization (`true`/`false`) | `true` (auto-detect) |
+| `CONTEXTFS_RTK_ULTRA_COMPACT` | Enable ultra-compact mode (`true`) | `false` |
 | `VERBOSE` | Enable verbose logging (`1`) | — |
 
 ---
