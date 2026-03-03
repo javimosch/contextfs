@@ -105,19 +105,19 @@ async function runFsTool(toolName, params, workspaceRoot, { insecure = false, on
         return { ok: true, result: { path: params.path, content } };
       }
 
-      case TOOLS.SMART: {
+      case TOOLS.SUMMARIZE: {
         const rtkExec = getRtkExecutor();
         if (rtkExec) {
           try {
-            const result = await rtkExec.execute('smart', [params.path], {
+            const result = await rtkExec.execute('summarize', [params.path], {
               cwd: workspaceRoot
             });
             return { ok: true, result: { path: params.path, content: result.stdout } };
           } catch (error) {
-            logVerbose(`[RTK] Smart tool failed: ${error.message}`);
+            logVerbose(`[RTK] Summarize tool failed: ${error.message}`);
           }
         }
-        // Fallback to basic read if smart is not available
+        // Fallback to basic read if summarize is not available
         return await runFsTool(TOOLS.READ, params, workspaceRoot, { insecure });
       }
 
