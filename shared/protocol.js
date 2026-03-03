@@ -30,7 +30,7 @@ const TOOLS = {
   MEMORY_BY_DATE:    'contextfs.memory_by_date',
   MEMORY_BY_TAG:     'contextfs.memory_by_tag',
   BASH_SCRIPT_ONCE:  'contextfs.bash_script_once',
-  SMART:             'contextfs.smart',
+  SUMMARIZE:         'contextfs.summarize',
 };
 
 // ── Parameter schemas (JSON Schema subset) ─────────────────────────────────
@@ -57,7 +57,7 @@ const SCHEMAS = {
     },
     additionalProperties: false,
   },
-  [TOOLS.SMART]: {
+  [TOOLS.SUMMARIZE]: {
     type: 'object',
     required: ['path'],
     properties: {

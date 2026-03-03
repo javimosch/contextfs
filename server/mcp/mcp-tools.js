@@ -71,7 +71,7 @@ const TOOLS = [
     },
   },
   {
-    name: 'contextfs.smart',
+    name: 'contextfs.summarize',
     description: 'Get an intelligent summary of a code file including signatures, docstrings, exports, and complexity metrics. Optimized for token efficiency.',
     inputSchema: {
       type: 'object',
