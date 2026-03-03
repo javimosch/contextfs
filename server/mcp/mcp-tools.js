@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * MCP tool definitions — all 9 contextfs tools with their JSON Schema inputSchemas.
+ * MCP tool definitions — all contextfs tools with their JSON Schema inputSchemas.
  * These are returned verbatim in the tools/list response.
  */
 const TOOLS = [
