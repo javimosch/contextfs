@@ -41,7 +41,7 @@ const ALLOWLIST = {
   'jest': ['--ci', '-u'],
   'node': ['--require', '-r', '-u'],
   'read': ['--level', 'minimal', 'default', 'full', '-u'],
-  'smart': ['-u']
+  'summarize': ['-u']
 };
 
 /**
@@ -105,10 +105,10 @@ class RTKExecutor {
       return this.nativeExecutor.execute(command, args, options);
     }
 
-    // Special handling for smart tool
-    if (command === 'smart') {
+    // Special handling for summarize tool
+    if (command === 'summarize') {
       try {
-        return await this.executeSmart(args, options);
+        return await this.executeSummarize(args, options);
       } catch (error) {
         if (error instanceof RTKExecutionError && error.shouldFallback) {
           return this.nativeExecutor.execute('cat', args, options);
@@ -247,13 +247,13 @@ class RTKExecutor {
   }
 
   /**
-   * Execute smart summary tool
+   * Execute summarize summary tool
    * @private
    */
-  async executeSmart(args, options) {
+  async executeSummarize(args, options) {
     const filePath = args[0];
     if (!filePath) {
-      throw new Error('File path is required for smart tool');
+      throw new Error('File path is required for summarize tool');
     }
 
     try {
@@ -267,8 +267,8 @@ class RTKExecutor {
         return this.executeRTK('read', [filePath], options);
       }
 
-      // 3. Get smart summary using minimal level
-      const smartResult = await this.executeRTK('read', ['--level', 'minimal', filePath], options);
+      // 3. Get summarize summary using minimal level
+      const summarizeResult = await this.executeRTK('read', ['--level', 'minimal', filePath], options);
 
       // 4. Calculate complexity
       let complexity = 'Low';
@@ -285,8 +285,8 @@ class RTKExecutor {
       ].join('\n');
 
       return {
-        ...smartResult,
-        stdout: header + smartResult.stdout
+        ...summarizeResult,
+        stdout: header + summarizeResult.stdout
       };
     } catch (error) {
       // Re-throw if already an RTKExecutionError
@@ -295,7 +295,7 @@ class RTKExecutor {
       // Handle other errors
       throw new RTKExecutionError(
         'tool-error',
-        `Smart tool failed: ${error.message}`,
+        `Summarize tool failed: ${error.message}`,
         { shouldFallback: true }
       );
     }
@@ -415,7 +415,7 @@ class RTKExecutor {
       'jest': ['jest', ...args],
       'node': ['node', ...args],
       'read': ['read', ...args],
-      'smart': ['read', '--level', 'minimal', ...args]
+      'summarize': ['read', '--level', 'minimal', ...args]
     };
 
     const rtkArgs = commandMappings[command] || [command, ...args];
