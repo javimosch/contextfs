@@ -19,6 +19,7 @@
 | 9     | MCP Integration Layer | 4/4 | Complete | 2026-03-01 |
 | 10    | Core Command Integration | 3/3 | Complete | 2026-03-01 |
 | 11    | Test Optimization & Advanced Features | Complete    | 2026-03-02 | 2026-03-02 |
+| 12    | Tool Refinement & Maintenance | 1/1 | Complete | 2026-03-03 |
 
 ## Phases
 
@@ -41,6 +42,7 @@
 - [x] **Phase 10: Core Command Integration** - ls, grep, git, and docker commands proxied through RTK with token reduction verification (completed 2026-03-01)
 - [x] **Phase 11: Test Optimization & Advanced Features** - Pattern detection for tests, failure filtering, and token reduction verification (Plan 01 complete 2026-03-02)
 - [x] **Phase 11 (Remaining): Advanced Features** - Smart/read tools and ultra-compact mode (completed 2026-03-02)
+- [x] **Phase 12: Tool Refinement & Maintenance** - Renaming contextfs.smart to contextfs.summarize (completed 2026-03-03)
 
 ## Phase Details
 
@@ -147,7 +149,7 @@ Wave 3: 10-03 (Verification and bash adapter - depends on 10-02) ✓ Complete
 2. Test commands show only failures (hiding passing test output)
 3. `npm test` and `cargo test` achieve 85-90% token reduction on typical suites
 4. `read` tool can filter file contents through RTK for large files
-5. `smart` tool provides 2-line code summaries for any file
+5. `summarize` tool provides 2-line code summaries for any file
 6. Ultra-compact mode (`-u` flag) produces maximum compression when requested
 7. Supported command flags pass through to RTK without errors
 
@@ -157,13 +159,20 @@ Wave 3: 10-03 (Verification and bash adapter - depends on 10-02) ✓ Complete
 - [x] `11-01-PLAN.md` — RTK proxying for test commands with failure filtering (TEST-01 to TEST-05) ✓ Complete
 - [x] `11-02-PLAN.md` — Smart/read tools and ultra-compact mode (ADV-01 to ADV-04) ✓ Complete
 
-**Wave Structure:**
-```
-Wave 1: 11-01 (Test optimization - infrastructure)
-Wave 2: 11-02 (Advanced tools - depends on 11-01)
-```
+---
+
+### Phase 12: Tool Refinement & Maintenance
+**Goal:** Improve tool clarity and naming consistency
+
+**Requirements:** TOOL-RENAME-01
+
+**Plans:** 1/1 plan complete
+
+**Plan List:**
+- [x] `27-PLAN.md` — Rename contextfs.smart to contextfs.summarize ✓ Complete
 
 ---
+
 
 ## Dependencies
 
@@ -186,6 +195,7 @@ Phase 11 (Test + Advanced)
 | 9     | v1.1      | 4/4            | ✓ Complete | 2026-03-01 |
 | 10    | v1.1      | 3/3            | ✓ Complete | 2026-03-01 |
 | 11    | v1.1      | 2/2            | ✅ Complete | 2026-03-02 |
+| 12    | v1.1      | 1/1            | ✅ Complete | 2026-03-03 |
 
 ## Requirements Coverage
 
@@ -231,7 +241,7 @@ Phase 11 (Test + Advanced)
 | TEST-04 | Phase 11 | `cargo test` proxied through RTK | ✅ Complete |
 | TEST-05 | Phase 11 | 85-90% token reduction for tests | ✅ Complete |
 | ADV-01 | Phase 11 | `read` tool with RTK integration | ✅ Complete |
-| ADV-02 | Phase 11 | `smart` tool for code summaries | ✅ Complete |
+| ADV-02 | Phase 11 | `summarize` tool for code summaries (formerly `smart`) | ✅ Complete |
 | ADV-03 | Phase 11 | Tee output recovery enabled | ✅ Complete |
 | ADV-04 | Phase 11 | Ultra-compact mode (`-u` flag) | ✅ Complete |
 | ADV-05 | Phase 11 | Argument passthrough for flags | ✅ Complete |
