@@ -32,7 +32,7 @@ describe('runToolLoop — no tool calls', () => {
     const { llm, mcpClient } = makeMocks('Hello world');
     const history = buildInitialHistory();
     const result = await runToolLoop({ llm, mcpClient, openAiTools: [], history, userMessage: 'hi' });
-    expect(result).toBe('Hello world');
+    expect(result.response).toBe('Hello world');
   });
 
   test('adds user message to history', async () => {
@@ -90,8 +90,8 @@ describe('runToolLoop — with tool calls', () => {
     const history = buildInitialHistory();
     const result = await runToolLoop({ llm, mcpClient, openAiTools: [], history, userMessage: 'list files' });
 
-    expect(mcpClient.callTool).toHaveBeenCalledWith('contextfs.list', { path: '.' });
-    expect(result).toBe('Done');
+    expect(mcpClient.callTool).toHaveBeenCalledWith('contextfs.list', { path: '.' }, expect.any(Number));
+    expect(result.response).toBe('Done');
   });
 
   test('adds tool result messages to history', async () => {
@@ -124,7 +124,7 @@ describe('runToolLoop — with tool calls', () => {
     const result = await runToolLoop({ llm, mcpClient, openAiTools: [], history, userMessage: 'read missing', onToolResult });
 
     expect(onToolResult).toHaveBeenCalledWith(expect.objectContaining({ error: 'File not found' }));
-    expect(result).toBe('Error handled');
+    expect(result.response).toBe('Error handled');
   });
 
   test('fires onToolCall callback', async () => {
@@ -161,7 +161,7 @@ describe('runToolLoop — with tool calls', () => {
     const history = buildInitialHistory();
     const result = await runToolLoop({ llm, mcpClient, openAiTools: [], history, userMessage: 'loop forever' });
 
-    expect(result).toBe('Summary done');
+    expect(result.response).toBe('Summary done');
     // complete was called MAX_TOOL_ITERATIONS times + 1 summary
     expect(complete).toHaveBeenCalledTimes(MAX_TOOL_ITERATIONS + 1);
   });
@@ -187,7 +187,7 @@ describe('runToolLoop — with tool calls', () => {
     const history = buildInitialHistory();
     const result = await runToolLoop({ llm, mcpClient, openAiTools: [], history, userMessage: 'go' });
     // Should not throw — callTool called with {} as fallback
-    expect(mcpClient.callTool).toHaveBeenCalledWith('contextfs.list', {});
-    expect(result).toBe('handled');
+    expect(mcpClient.callTool).toHaveBeenCalledWith('contextfs.list', {}, expect.any(Number));
+    expect(result.response).toBe('handled');
   });
 });

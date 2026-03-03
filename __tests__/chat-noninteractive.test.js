@@ -127,7 +127,7 @@ describe('runNonInteractive — plain text output', () => {
     const result = await runNonInteractive({
       mcpClient, llm, openAiTools: [], message: 'say hello', outputJson: false, noTools: false,
     });
-    expect(result.message).toBe('Hello!');
+    expect(result.message.response).toBe('Hello!');
     expect(result.toolCalls).toHaveLength(0);
     expect(result.durationMs).toBeGreaterThanOrEqual(0);
   });
@@ -137,7 +137,7 @@ describe('runNonInteractive — plain text output', () => {
     const result = await runNonInteractive({
       mcpClient: makeMcpClient(), llm, openAiTools: [], message: 'hi', outputJson: false, noTools: false,
     });
-    expect(result.message).toBe('');
+    expect(result.message.response).toBe('');
   });
 });
 
@@ -167,7 +167,7 @@ describe('runNonInteractive — with tool calls', () => {
     expect(result.toolCalls).toHaveLength(1);
     expect(result.toolCalls[0].name).toBe('contextfs.list');
     expect(result.toolCalls[0].args).toEqual({ path: '.' });
-    expect(result.message).toBe('Done listing');
+    expect(result.message.response).toBe('Done listing');
   });
 
   test('--no-tools disables tool calls entirely', async () => {
@@ -183,7 +183,7 @@ describe('runNonInteractive — with tool calls', () => {
     // LLM was called with empty tools array, so no tool calls happened
     expect(mcpClient.callTool).not.toHaveBeenCalled();
     expect(result.toolCalls).toHaveLength(0);
-    expect(result.message).toBe('No tools used');
+    expect(result.message.response).toBe('No tools used');
   });
 
   test('tool errors are handled and loop continues', async () => {
@@ -194,7 +194,7 @@ describe('runNonInteractive — with tool calls', () => {
       mcpClient, llm, openAiTools: [], message: 'read missing file', outputJson: false, noTools: false,
     });
 
-    expect(result.message).toBe('Handled error');
+    expect(result.message.response).toBe('Handled error');
   });
 });
 
